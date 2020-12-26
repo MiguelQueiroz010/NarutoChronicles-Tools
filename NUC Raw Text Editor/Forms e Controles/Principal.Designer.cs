@@ -43,6 +43,7 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
@@ -55,7 +56,6 @@
             this.filename = new System.Windows.Forms.Label();
             this.abrir = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -94,7 +94,7 @@
             // abrirToolStripMenuItem
             // 
             this.abrirToolStripMenuItem.Name = "abrirToolStripMenuItem";
-            this.abrirToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.abrirToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.abrirToolStripMenuItem.Text = "Abrir";
             this.abrirToolStripMenuItem.Click += new System.EventHandler(this.abrirToolStripMenuItem_Click);
             // 
@@ -102,28 +102,28 @@
             // 
             this.salvarToolStripMenuItem.Enabled = false;
             this.salvarToolStripMenuItem.Name = "salvarToolStripMenuItem";
-            this.salvarToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.salvarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.salvarToolStripMenuItem.Text = "Salvar";
             // 
             // salvarComoToolStripMenuItem
             // 
             this.salvarComoToolStripMenuItem.Enabled = false;
             this.salvarComoToolStripMenuItem.Name = "salvarComoToolStripMenuItem";
-            this.salvarComoToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.salvarComoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.salvarComoToolStripMenuItem.Text = "Salvar Como";
             // 
             // fecharToolStripMenuItem
             // 
             this.fecharToolStripMenuItem.Enabled = false;
             this.fecharToolStripMenuItem.Name = "fecharToolStripMenuItem";
-            this.fecharToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.fecharToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.fecharToolStripMenuItem.Text = "Fechar";
             this.fecharToolStripMenuItem.Click += new System.EventHandler(this.fecharToolStripMenuItem_Click);
             // 
             // sairToolStripMenuItem
             // 
             this.sairToolStripMenuItem.Name = "sairToolStripMenuItem";
-            this.sairToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.sairToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.sairToolStripMenuItem.Text = "Sair";
             this.sairToolStripMenuItem.Click += new System.EventHandler(this.sairToolStripMenuItem_Click);
             // 
@@ -157,7 +157,7 @@
             this.listView1.Size = new System.Drawing.Size(478, 213);
             this.listView1.TabIndex = 3;
             this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.View = System.Windows.Forms.View.SmallIcon;
             this.listView1.Visible = false;
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
             // 
@@ -179,6 +179,11 @@
             // 
             this.columnHeader4.Text = "Tamanho";
             this.columnHeader4.Width = 84;
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.Text = "Tipo";
+            this.columnHeader5.Width = 72;
             // 
             // button3
             // 
@@ -278,11 +283,11 @@
             this.archivescount.BackColor = System.Drawing.Color.LightSteelBlue;
             this.archivescount.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.archivescount.ForeColor = System.Drawing.Color.Black;
-            this.archivescount.Location = new System.Drawing.Point(242, 53);
+            this.archivescount.Location = new System.Drawing.Point(300, 53);
             this.archivescount.Name = "archivescount";
-            this.archivescount.Size = new System.Drawing.Size(138, 13);
+            this.archivescount.Size = new System.Drawing.Size(53, 13);
             this.archivescount.TabIndex = 2;
-            this.archivescount.Text = "Arquivos Comprimidos: ";
+            this.archivescount.Text = "Pastas: ";
             // 
             // size
             // 
@@ -332,11 +337,6 @@
             this.label1.TabIndex = 10;
             this.label1.Text = "(Ou arraste e solte aqui)";
             // 
-            // columnHeader5
-            // 
-            this.columnHeader5.Text = "Tipo";
-            this.columnHeader5.Width = 72;
-            // 
             // treeView1
             // 
             this.treeView1.Location = new System.Drawing.Point(12, 126);
@@ -344,7 +344,6 @@
             this.treeView1.Size = new System.Drawing.Size(478, 213);
             this.treeView1.TabIndex = 11;
             this.treeView1.Visible = false;
-            //this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
             // Principal
             // 

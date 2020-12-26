@@ -234,30 +234,17 @@ namespace NUC_Raw_Tools
 
             return sizes;
         }
-        void ListInsert(TreeView list, RawFile files, string name)
+        void ListInsert(TreeView list, Raw files, string name)
         {
-            //groupSelected = new List<int>();
-            //list.Nodes.Clear();
-            //for(int i =0; i<files.files.Count;i++)
-            //{
-            //    groupSelected.Add(i + 1);
-            //    TreeNode group = new TreeNode((i+1).ToString()+" | "+Path.GetFileName(name) + "_" + i);
-            //    group.Text += " | " + files.archivePointers[i].Pos.ToString("X2");
-            //    group.Text += " | " + Sizes((int)files.archivePointers[i].Size);
-
-            //    for(int i2=0;i2<files.files[i].subFiles.Count;i2++)
-            //    {
-            //        group.Nodes.Add(Path.GetFileName(name) + "_" + i + "_" + i2);
-            //        //ListViewItem item = new ListViewItem((i2 + 1).ToString(), group);
-            //        //item.SubItems.Add(Path.GetFileName(name)+"_" + i + "_" + i2);
-            //        //item.SubItems.Add(files.files[i].subFiles[i2].Pos.ToString("X2"));
-            //        //item.SubItems.Add(Sizes((int)files.files[i].subFiles[i2].Size));
-            //        //item.SubItems.Add(files.files[i].subFiles[i2].Type);
-            //        //list.Items.Add(item);
-            //    }
-            //    treeView1.Nodes.Add(group);
+            groupSelected = new List<int>();
+            list.Nodes.Clear();
+            for (int i = 0; i < files.Root.Count; i++)
+            {
+                groupSelected.Add(i + 1);
+                TreeNode group = new TreeNode(Path.GetFileName(name) + "_" + i);
+                treeView1.Nodes.Add(group);
+            }
         }
-
         void Abrir(bool isDrag, string fileName)
         {
             //if (isDrag)
@@ -296,22 +283,21 @@ namespace NUC_Raw_Tools
                 raw = File.ReadAllBytes(opened.FileName);
                 rawfile = new Raw();
                 rawfile.RawR(raw);
-                foreach (var s in rawfile.Root)
-                    MessageBox.Show(s.Index + " " + s.Position.ToString("X2") + " " + s.Size.ToString("X2"));
+                    
                 #endregion
                 #region Rótulos
                 rawname = Path.GetFileName(opened.FileName);
                 linkLabel1.Text += Path.GetDirectoryName(opened.FileName);
                 filename.Text += Path.GetFileName(opened.FileName);
-                //size.Text += Sizes(rawfile.raw.Length);
-                //archivescount.Text += rawfile.files.Count;
+                size.Text += Sizes(raw.Length);
+                archivescount.Text += rawfile.Root.Count-1;
                 #endregion
                 #region Funções
                 ShowHide();
-                //ListInsert(this.treeView1, rawfile, opened.FileName);
-                #endregion
+                ListInsert(this.treeView1, rawfile, opened.FileName);
+                    #endregion
+                
             }
-            //}
         }
         //void Export(TreeView list, RawFile file)
         //{
