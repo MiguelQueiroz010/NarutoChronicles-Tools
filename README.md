@@ -1,6 +1,5 @@
 # NarutoChronicles-Tools
-Ferramenta para manipulação dos arquivos RAW do jogo Naruto Uzumaki Chronicles 2.
---------------------------------------------------------
+ Ferramenta para manipulação dos arquivos RAW do jogo Naruto Uzumaki Chronicles 2.
 
 # Créditos
 A ferramenta em si foi feita para o projeto do grupo Naruto Classics no Discord, inclusive detalhes dos
