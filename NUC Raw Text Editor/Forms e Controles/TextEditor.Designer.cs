@@ -35,7 +35,8 @@
             this.button5 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.filename = new System.Windows.Forms.Label();
-            this.numberedRTB1 = new NUC_Raw_Tools.NRTB();
+            this.nrtb1 = new NUC_Raw_Tools.NRTB(this);
+            this.nrtb2 = new NUC_Raw_Tools.NRTB(this);
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,7 +50,7 @@
             this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.label1.Location = new System.Drawing.Point(0, 1);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(118, 22);
+            this.label1.Size = new System.Drawing.Size(134, 25);
             this.label1.TabIndex = 6;
             this.label1.Text = "Editor de Texto";
             // 
@@ -59,9 +60,9 @@
             this.label2.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.Black;
-            this.label2.Location = new System.Drawing.Point(12, 186);
+            this.label2.Location = new System.Drawing.Point(10, 277);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(91, 18);
+            this.label2.Size = new System.Drawing.Size(102, 20);
             this.label2.TabIndex = 5;
             this.label2.Text = "Sequência:";
             // 
@@ -70,7 +71,7 @@
             this.button4.Enabled = false;
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button4.Location = new System.Drawing.Point(255, 168);
+            this.button4.Location = new System.Drawing.Point(253, 259);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 11;
@@ -83,7 +84,7 @@
             this.button5.Enabled = false;
             this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button5.Location = new System.Drawing.Point(345, 168);
+            this.button5.Location = new System.Drawing.Point(343, 259);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 12;
@@ -109,28 +110,41 @@
             this.filename.AutoSize = true;
             this.filename.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.filename.ForeColor = System.Drawing.Color.DarkBlue;
-            this.filename.Location = new System.Drawing.Point(124, 4);
+            this.filename.Location = new System.Drawing.Point(140, 6);
             this.filename.Name = "filename";
-            this.filename.Size = new System.Drawing.Size(11, 15);
+            this.filename.Size = new System.Drawing.Size(13, 17);
             this.filename.TabIndex = 7;
             this.filename.Text = " ";
             // 
-            // numberedRTB1
+            // nrtb1
             // 
-            this.numberedRTB1.BackColor = System.Drawing.SystemColors.Window;
-            this.numberedRTB1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.numberedRTB1.Location = new System.Drawing.Point(15, 50);
-            this.numberedRTB1.Name = "numberedRTB1";
-            this.numberedRTB1.Size = new System.Drawing.Size(405, 102);
-            this.numberedRTB1.TabIndex = 14;
+            this.nrtb1.BackColor = System.Drawing.SystemColors.Window;
+            this.nrtb1.RichTextBox.BackColor = System.Drawing.SystemColors.Control;
+            this.nrtb1.Strip.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.nrtb1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.nrtb1.Location = new System.Drawing.Point(14, 46);
+            this.nrtb1.Name = "nrtb1";
+            this.nrtb1.Size = new System.Drawing.Size(395, 89);
+            this.nrtb1.TabIndex = 14;
+            // 
+            // nrtb2
+            // 
+            this.nrtb2.BackColor = System.Drawing.SystemColors.Window;
+            this.nrtb2.Strip.BackColor = System.Drawing.SystemColors.Control;
+            this.nrtb2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.nrtb2.Location = new System.Drawing.Point(14, 152);
+            this.nrtb2.Name = "nrtb2";
+            this.nrtb2.Size = new System.Drawing.Size(395, 89);
+            this.nrtb2.TabIndex = 15;
             // 
             // TextEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::NUC_Raw_Tools.Properties.Resources.PrincipalBGS;
-            this.ClientSize = new System.Drawing.Size(430, 215);
-            this.Controls.Add(this.numberedRTB1);
+            this.ClientSize = new System.Drawing.Size(430, 304);
+            this.Controls.Add(this.nrtb2);
+            this.Controls.Add(this.nrtb1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
@@ -141,7 +155,7 @@
             this.MaximizeBox = false;
             this.Name = "TextEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "TextEditor";
+            this.Text = "Editor de Texto";
             this.Load += new System.EventHandler(this.TextEditor_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
@@ -157,6 +171,7 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label filename;
-        private NUC_Raw_Tools.NRTB numberedRTB1;
+        private NRTB nrtb1;
+        private NRTB nrtb2;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.IO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,10 +12,10 @@ namespace NUC_Raw_Tools
 {
     public partial class TextEditor : Form
     {
-        List<string> seqs;
-        Principal p01;
+        public List<string> seqs;
+        public Principal p01;
         Point lastPoint;
-        int actual = 1;
+        public int actual = 1;
         public TextEditor(Principal p1)
         {
             p01 = p1;
@@ -77,15 +78,27 @@ namespace NUC_Raw_Tools
         void TextRender()
         {
             seqs = new List<string>();
-            //foreach(Types.Text t in p01.rawfile.files[p01.treeView1.SelectedNode.Parent.Index].subFiles)
-            //{
-            //    foreach (var s in t.sequences)
-            //       {
-            //            seqs.Add(Encodings.Naruto.UzumakiChronicles2.GetString(s));
-            //        }
-            //}
-            numberedRTB1.RichTextBox.Text = seqs[actual-1];
-            filename.Text += p01.rawname + p01.treeView1.SelectedNode.Text;
+            switch(p01.treeView1.SelectedNode.Level)
+            {
+                case 1:
+                        foreach (var s in p01.rawfile.Pastas[p01.treeView1.SelectedNode.Index].texto.sequences)
+                        {
+                            seqs.Add(Encodings.Naruto.UzumakiChronicles2.GetString(s));
+                        }
+                    
+                    break;
+
+                case 2:
+                    foreach (var s in p01.rawfile.Pastas[p01.treeView1.SelectedNode.Parent.Index].Arquivos[p01.treeView1.SelectedNode.Index].texto.sequences)
+                    {
+                        seqs.Add(Encodings.Naruto.UzumakiChronicles2.GetString(s));
+                    }
+                    break;
+            }
+            nrtb1.RichTextBox.Text = seqs[actual - 1];
+            nrtb1.Draw(nrtb1.RichTextBox);
+            nrtb2.RichTextBox.Text = seqs[actual - 1];
+            filename.Text += p01.treeView1.SelectedNode.Text;
             if (filename.Text.Length > 27)
             {
                 string p1, p2;
@@ -93,8 +106,8 @@ namespace NUC_Raw_Tools
                 p2 = filename.Text.Substring(27);
                 filename.Text = p1 + "\n" + p2;
             }
-            label2.Text += actual+" de "+seqs.Count;
-            if(seqs.Count>1)
+            label2.Text += actual + " de " + seqs.Count;
+            if (seqs.Count > 1)
             {
                 button5.Enabled = true;
             }
@@ -106,11 +119,14 @@ namespace NUC_Raw_Tools
             if(actual>=1|actual==seqs.Count)
             {
                 button4.Enabled = true;
+                
             }
             if (actual == seqs.Count-1)
                 button5.Enabled = false;
             actual++;
-            numberedRTB1.RichTextBox.Text = seqs[actual-1];
+            nrtb1.RichTextBox.Text = seqs[actual - 1];
+            nrtb1.Draw(nrtb1.RichTextBox);
+            nrtb2.RichTextBox.Text = seqs[actual-1];
             label2.Text = "Sequência: "+actual + " de " + seqs.Count;
         }
 
@@ -121,13 +137,21 @@ namespace NUC_Raw_Tools
             if (actual >= 1)
                 button5.Enabled = true;
             actual--;
-            numberedRTB1.RichTextBox.Text = seqs[actual-1];
+            nrtb1.RichTextBox.Text = seqs[actual - 1];
+            nrtb1.Draw(nrtb1.RichTextBox);
+            nrtb2.RichTextBox.Text = seqs[actual-1];
             label2.Text = "Sequência: " + actual + " de " + seqs.Count;
         }
 
         private void TextEditor_Load(object sender, EventArgs e)
         {
             TextRender();
+        }
+        public void save()
+        {
+            File.WriteAllBytes("text" + actual.ToString() + ".bin", Encodings.Naruto.UzumakiChronicles2.GetBytes(nrtb2.RichTextBox.Text));
+            nrtb1.RichTextBox.Text = nrtb2.RichTextBox.Text;
+            nrtb1.Draw(nrtb1.RichTextBox);
         }
         #endregion
     }

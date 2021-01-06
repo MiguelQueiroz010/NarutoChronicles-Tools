@@ -101,6 +101,15 @@ namespace NUC_Raw_Tools.Properties {
         }
         
         /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a .
+        /// </summary>
+        internal static string Recentes {
+            get {
+                return ResourceManager.GetString("Recentes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap unnamed {

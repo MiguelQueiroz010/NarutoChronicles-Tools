@@ -19,6 +19,7 @@ namespace NUC_Raw_Tools
             InitializeComponent();
             label4.Text = "Not a commercial tool, by fan to fan.\nFerramenta não comercial, de fã para fã.";
             label5.Text = "";
+            label6.Text = Application.ProductVersion;
         }
 
 

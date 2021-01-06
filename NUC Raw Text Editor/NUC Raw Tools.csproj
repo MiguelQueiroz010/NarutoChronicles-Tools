@@ -66,16 +66,87 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Arquivo\Bin.cs" />
-    <Compile Include="Arquivo\Raw.cs" />
+    <Compile Include="Arquivo\ArquivoRAW\Bin.cs" />
+    <Compile Include="Arquivo\ArquivoRAW\EncFile.cs" />
+    <Compile Include="Arquivo\ArquivoRAW\Encodings.cs" />
+    <Compile Include="Arquivo\ArquivoRAW\RAW.cs" />
+    <Compile Include="Arquivo\ImgLib\Common\BinaryReaderExtensions.cs" />
+    <Compile Include="Arquivo\ImgLib\Common\Endianness.cs" />
+    <Compile Include="Arquivo\ImgLib\Common\GenericDictionary.cs" />
+    <Compile Include="Arquivo\ImgLib\Common\ImageExtensions.cs" />
+    <Compile Include="Arquivo\ImgLib\Common\ImageUtils.cs" />
+    <Compile Include="Arquivo\ImgLib\Common\InteropUtils.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ColorCodec.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ColorCodecEndiannessDependent.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ColorComparers\ARGBColorComparer.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ImageDecoder.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ImageDecoderDirectColor.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ImageDecoderIndexed.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ImageEncoder.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ImageEncoderDirectColor.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\ImageEncoderIndexed.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodec16BitLEABGR.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodec24BitRGB.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodec32BitABGR.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodec32BitARGB.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodec32BitBGRA.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodec32BitRGBA.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodecDXT1.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodecDXT1Gamecube.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodecI4.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodecI8.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodecIA4.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodecIA8.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodecRGB565.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\ColorCodecRGB5A3.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\IndexCodec4Bpp.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\Implementation\IndexCodec8Bpp.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\IndexCodec.cs" />
+    <Compile Include="Arquivo\ImgLib\Encoding\IndexCodecEndiannessDependent.cs" />
+    <Compile Include="Arquivo\ImgLib\Filters\Filter.cs" />
+    <Compile Include="Arquivo\ImgLib\Filters\FilterComposer.cs" />
+    <Compile Include="Arquivo\ImgLib\Filters\GamecubePlanarFilter.cs" />
+    <Compile Include="Arquivo\ImgLib\Filters\SwizzleFilter.cs" />
+    <Compile Include="Arquivo\ImgLib\Filters\TileFilter.cs" />
+    <Compile Include="Arquivo\ImgLib\Filters\TIM2PaletteFilter.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\DummyTexture.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\GenericTextureFormat.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\NamcoTexture.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\NamcoTexture.Serializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\NUTTexture.Serializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\PE3DATTexture.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\PE3DATTexture.Serializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\PE3SimpleDATTexture.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\PE3SimpleDATTexture.Serializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TacticsOgreEFXTexture.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TacticsOgreEFXTexture.Serializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TIM2Texture.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TIM2Texture.Segment.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TIM2Texture.Serializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TPLTexture.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TPLTexture.Serializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TX48Texture.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Implementation\TX48Texture.Serializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\PalettedTextureFormat.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\Exceptions\MetadataException.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\Metadata\MetadataReader.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\Metadata\MetadataReaderBase.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\Metadata\MetadataWriter.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\Metadata\MetadataWriterBase.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\Metadata\XmlMetadataReader.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\Metadata\XmlMetadataWriter.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\SimpleTextureFormatSerializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\TextureFormatSerializer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\Serialization\TextureFormatSerializerProvider.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\TextureContainer.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\TextureFormat.cs" />
+    <Compile Include="Arquivo\ImgLib\Formats\TextureFormatBase.cs" />
     <Compile Include="Forms e Controles\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms e Controles\AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Codificações\EncFile.cs" />
-    <Compile Include="Codificações\Encodings.cs" />
     <Compile Include="Forms e Controles\NRTB.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -95,7 +166,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Arquivo\RawFile.cs" />
     <Compile Include="Forms e Controles\TextEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -138,6 +208,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <None Include="Resources\Recentes.txt" />
     <None Include="Resources\buttons.png" />
     <None Include="Resources\PrincipalBGS.png" />
     <None Include="Resources\PrincipalBG.png" />
@@ -150,4 +221,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.None" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

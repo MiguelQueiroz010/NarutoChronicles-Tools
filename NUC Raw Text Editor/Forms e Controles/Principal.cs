@@ -9,18 +9,19 @@ using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using System.Diagnostics;
-using NUC_Raw_Tools.Arquivo;
+using NUC_Raw_Tools.ArquivoRAW;
 
 namespace NUC_Raw_Tools
 {
     public partial class Principal : Form
     {
         #region Variáveis
-        public Arquivo.Raw rawfile;
+        public RAW rawfile;
         public List<int> groupSelected;
         Point lastPoint;
         OpenFileDialog opened;
-        public string rawname;
+        public string rawname, pathf;
+        string[] recentes;
         static readonly string[] suffixes =
 { "Bytes", "KB", "MB", "GB", "TB", "PB" };
         byte[] raw;
@@ -28,6 +29,7 @@ namespace NUC_Raw_Tools
         public Principal()
         {
             InitializeComponent();
+            CheckRecent();
         }
 
         #region Elementos Funcionais e Visuais
@@ -36,10 +38,12 @@ namespace NUC_Raw_Tools
         {
             abrir.Visible = !abrir.Visible;
             label1.Visible = !label1.Visible;
+            salvarToolStripMenuItem.Enabled = !salvarToolStripMenuItem.Enabled;
+            salvarComoToolStripMenuItem.Enabled = !salvarComoToolStripMenuItem.Enabled;
             fecharToolStripMenuItem.Enabled = !fecharToolStripMenuItem.Enabled;
             groupBox1.Visible = !groupBox1.Visible;
             treeView1.Visible = !treeView1.Visible;
-            Button[] buttons = { button3, button4, button5, button6 };
+            Button[] buttons = { Editar};
             foreach (var b in buttons)
                 b.Visible = !b.Visible;
             if (groupBox1.Visible)
@@ -64,6 +68,10 @@ namespace NUC_Raw_Tools
             size.Text = "Tamanho: ";
             filename.Text = "Arquivo: ";
             path.Text = "Local: ";
+            exportarToolStripMenuItem.Enabled = false;
+            importarToolStripMenuItem.Enabled = false;
+            importarTexturaToolStripMenuItem.Enabled = false;
+            exportarTexturaToolStripMenuItem.Enabled = false;
         }
         #region Design
         private void abrir_Click(object sender, EventArgs e)
@@ -88,6 +96,57 @@ namespace NUC_Raw_Tools
         }
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
+
+        }
+        private void exportarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Export(treeView1, rawfile);
+        }
+
+        private void exportarTexturaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Export(treeView1, rawfile);
+        }
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            switch (treeView1.SelectedNode.Level)
+            {
+                case 1:
+                    exportarToolStripMenuItem.Enabled = true;
+                    exportarTexturaToolStripMenuItem.Enabled = false;
+                    #region Verificar se é texto
+                    if (rawfile.Pastas[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
+                        Editar.Enabled = true;
+                    else
+                        Editar.Enabled = false;
+                    #endregion
+                    break;
+
+                case 2:
+                    exportarToolStripMenuItem.Enabled = true;
+                    exportarTexturaToolStripMenuItem.Enabled = false;
+                    #region Verificar se é texto
+                    if (rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
+                        Editar.Enabled = true;
+                    else
+                        Editar.Enabled = false;
+                    #endregion
+                    break;
+
+                case 3:
+                    exportarTexturaToolStripMenuItem.Enabled = true;
+                    exportarToolStripMenuItem.Enabled = false;
+                    
+                    break;
+
+                default:
+                    exportarTexturaToolStripMenuItem.Enabled = false;
+                    exportarToolStripMenuItem.Enabled = false;
+                    importarTexturaToolStripMenuItem.Enabled = false;
+                    Editar.Enabled = false;
+                    break;
+            }
+
 
         }
         #endregion
@@ -175,7 +234,7 @@ namespace NUC_Raw_Tools
         }
         private void button3_Click(object sender, EventArgs e)
         {
-            //EditarTexto();
+            EditarTexto();
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -185,12 +244,26 @@ namespace NUC_Raw_Tools
 
         private void button6_Click(object sender, EventArgs e)
         {
-            //Export(treeView1, rawfile);
+            Export(treeView1, rawfile);
         }
-
+        private void salvarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rawfile.Rebuild(pathf, rawname);
+        }
         private void button4_Click(object sender, EventArgs e)
         {
 
+        }
+        private void salvarComoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "Arquivo RAW|*.raw";
+            save.FileName = rawname.Substring(0, rawname.Length - 4);
+            if(save.ShowDialog()==DialogResult.OK)
+            {
+                rawfile.Rebuild(Path.GetDirectoryName(save.FileName), Path.GetFileName(save.FileName));
+                MessageBox.Show("Concluído!", "Êxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
         private void Principal_DragDrop(object sender, DragEventArgs e)
         {
@@ -234,109 +307,134 @@ namespace NUC_Raw_Tools
 
             return sizes;
         }
-        void ListInsert(TreeView list, Raw files, string name)
-        {
-            groupSelected = new List<int>();
-            list.Nodes.Clear();
-            for (int i = 0; i < files.Root.Count; i++)
-            {
-                groupSelected.Add(i + 1);
-                TreeNode group = new TreeNode(Path.GetFileName(name) + "_" + i);
-                treeView1.Nodes.Add(group);
-            }
-        }
         void Abrir(bool isDrag, string fileName)
         {
-            //if (isDrag)
-            //{
-            //    #region Se arquivo já aberto
-            //    if (rawfile != null)
-            //        CloseFile();
-            //    #endregion
-            //    #region Arquivo
-            //    raw = File.ReadAllBytes(fileName);
-            //    rawfile = new RawFile(raw);
-            //    #endregion
-            //    #region Rótulos
-            //    rawname = Path.GetFileName(fileName);
-            //    linkLabel1.Text += Path.GetDirectoryName(fileName);
-            //    filename.Text += Path.GetFileName(fileName);
-            //    size.Text += Sizes(rawfile.raw.Length);
-            //    archivescount.Text += rawfile.files.Count;
-            //    #endregion
-            //    #region Funções
-            //    ShowHide();
-            //    ListInsert(this.treeView1, rawfile, fileName);
-            //    #endregion
-            //}
-            //else
-            //{
-            opened = new OpenFileDialog();
-            opened.Filter = "Arquivo RAW NUC|*.raw";
-            if (opened.ShowDialog() == DialogResult.OK)
+            if (isDrag)
             {
                 #region Se arquivo já aberto
                 if (rawfile != null)
                     CloseFile();
                 #endregion
                 #region Arquivo
-                raw = File.ReadAllBytes(opened.FileName);
-                rawfile = new Raw();
-                rawfile.RawR(raw);
-                    
+                raw = File.ReadAllBytes(fileName);
+                rawfile = new RAW(raw, 128);
                 #endregion
                 #region Rótulos
-                rawname = Path.GetFileName(opened.FileName);
-                linkLabel1.Text += Path.GetDirectoryName(opened.FileName);
-                filename.Text += Path.GetFileName(opened.FileName);
+                rawname = Path.GetFileName(fileName);
+                pathf = Path.GetDirectoryName(fileName);
+                linkLabel1.Text += Path.GetDirectoryName(fileName);
+                filename.Text += Path.GetFileName(fileName);
                 size.Text += Sizes(raw.Length);
-                archivescount.Text += rawfile.Root.Count-1;
+                archivescount.Text += rawfile.folderCount - 1;
                 #endregion
                 #region Funções
+                rawfile.ListInsert(treeView1, rawfile, fileName);
                 ShowHide();
-                ListInsert(this.treeView1, rawfile, opened.FileName);
+                AddRecent(pathf + @"\" + rawname);
+                #endregion
+            }
+            else
+            {
+                opened = new OpenFileDialog();
+                opened.Filter = "Arquivo RAW NUC|*.raw";
+                if (opened.ShowDialog() == DialogResult.OK)
+                {
+                    #region Se arquivo já aberto
+                    if (rawfile != null)
+                        CloseFile();
                     #endregion
-                
+                    #region Arquivo
+                    raw = File.ReadAllBytes(opened.FileName);
+
+                    rawfile = new RAW(raw, 128);
+                    #endregion
+                    #region Rótulos
+                    rawname = Path.GetFileName(opened.FileName);
+                    pathf = Path.GetDirectoryName(opened.FileName);
+                    linkLabel1.Text += Path.GetDirectoryName(opened.FileName);
+                    filename.Text += Path.GetFileName(opened.FileName);
+                    size.Text += Sizes(raw.Length);
+                    archivescount.Text += rawfile.folderCount - 1;
+                    #endregion
+                    #region Funções
+                    rawfile.ListInsert(treeView1, rawfile, opened.FileName);
+                    ShowHide();
+                    AddRecent(pathf + @"\" + rawname);
+                    #endregion
+
+                }
+            }
+            
+        }
+        void Export(TreeView list, RAW file)
+        {
+            var save = new FolderBrowserDialog();
+            if (save.ShowDialog() == DialogResult.OK)
+            {
+                switch(treeView1.SelectedNode.Level)
+                {
+                    case 1:
+                        File.WriteAllBytes(save.SelectedPath+"/"+treeView1.SelectedNode.Text+".sraw", file.Pastas[treeView1.SelectedNode.Index].FileData);
+                        MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        break;
+                    case 2:
+
+                        File.WriteAllBytes(save.SelectedPath+"/"+treeView1.SelectedNode.Text + ".sraw", file.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].FileData);
+                        MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        break;
+                    case 3:
+                        rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.images[treeView1.SelectedNode.Index].Save(save.SelectedPath+"/" + treeView1.SelectedNode.Text + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                        MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        break;
+                }
+            }
+        }        
+        public void CheckRecent()
+        {
+            recenteToolStripMenuItem.Enabled = false;
+            if (recenteToolStripMenuItem.HasDropDownItems)
+                recenteToolStripMenuItem.DropDownItems.Clear();
+            if (File.Exists("recent.txt"))
+            {
+                string[] lines = File.ReadAllLines("recent.txt");
+                foreach (string line in lines)
+                    if (line.Trim() != "")
+                    {
+                        ToolStripMenuItem item = new ToolStripMenuItem(line.Trim());
+                        item.Click += recentClick;
+                        recenteToolStripMenuItem.DropDownItems.Add(item);
+                        recenteToolStripMenuItem.Enabled = true;
+                    }
             }
         }
-        //void Export(TreeView list, RawFile file)
-        //{
-        //    var save = new FolderBrowserDialog();
-        //    if(save.ShowDialog()==DialogResult.OK)
-        //    {
-        //        if(treeView1.SelectedNode.Level==1)
-        //        {
-        //            File.WriteAllBytes(save.SelectedPath + "/" + treeView1.SelectedNode.Text + ".raw", file.files[treeView1.SelectedNode.Parent.Index].subFiles[treeView1.SelectedNode.Index].Data);
-        //            MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //            return;
-        //        }
-        //        string[] separator = { "|" };
-        //        string[] properties = treeView1.SelectedNode.Text.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-        //        File.WriteAllBytes(save.SelectedPath + "/" + properties[1] + ".raw", file.files[treeView1.SelectedNode.Index].FileData);
-        //        MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //    }
-
-        //}
-
-        //void EditarTexto()
-        //{
-        //    TextEditor editor = new TextEditor(this);
-        //    editor.ShowDialog();
-        //}
+        public void recentClick(object sender, EventArgs e)
+        {
+            if ((sender as ToolStripMenuItem).Text.EndsWith(".RAW") || ((sender as ToolStripMenuItem).Text.EndsWith(".raw")))
+            {
+                Abrir(true, (sender as ToolStripMenuItem).Text);
+            }
+            
+        }
+        public void AddRecent(string path)
+        {
+            if (!File.Exists("recent.txt"))
+                File.WriteAllLines("recent.txt", new string[0]);
+            string[] lines = File.ReadAllLines("recent.txt");
+            List<string> result = new List<string>();
+            result.Add(path);
+            int index = 0;
+            while (result.Count < 10 && index < lines.Length && lines[index] != path)
+                result.Add(lines[index++]);
+            File.WriteAllLines("recent.txt", result.ToArray());
+            CheckRecent();
+        }
+        void EditarTexto()
+        {
+            TextEditor editor = new TextEditor(this);
+            editor.ShowDialog();
+        }
         #endregion
 
-        //private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
-        //{
-        //        if (rawfile.files[treeView1.SelectedNode.Parent.Index].subFiles[treeView1.SelectedNode.Index].Type == "Texto")
-        //        {
-        //            button6.Enabled = true;
-        //            button3.Enabled = true;
-        //        }
-        //        if(rawfile.files[treeView1.SelectedNode.Parent.Index].subFiles[treeView1.SelectedNode.Index].Type != "Texto")
-        //        {
-        //            button6.Enabled = false;
-        //            button3.Enabled = false;
-        //        }
-        //}
+        
     }
 }

@@ -12,21 +12,24 @@ namespace NUC_Raw_Tools
     public partial class NRTB : UserControl
     {
         private readonly LineNumberStrip _strip;
-        public NRTB()
+        public TextEditor editor;
+        public NRTB(TextEditor ed)
         {
             InitializeComponent();
             _strip = new LineNumberStrip(richTextBox);
             this.Controls.Add(_strip);
             this.BorderStyle = BorderStyle.Fixed3D;
             base.BackColor = richTextBox.BackColor;
+            editor = ed;
         }
         #region Botões e Especiais
         Rectangle cloneRect;
         Bitmap bmpCrop;
+        
         Bitmap buttons = new Bitmap(Properties.Resources.buttons);
         string[] simbols = { "%l1", "%r1", "%r2", "%l2", "%2", "%4", "%6", "%8", "%u", "%d", "%le", "%ri","%pd","%pl" };
         string[] colors = {"$R","$O","$Y","$G","$B","$P" };
-        void DrawButtons(int finded,string s)
+        void DrawButtons(int finded,string s, RichTextBox richText)
         {
 
             switch (s)
@@ -143,8 +146,8 @@ namespace NUC_Raw_Tools
             bmpCrop = new Bitmap(cloneRect.Width, cloneRect.Height);
             bmpCrop = buttons.Clone(cloneRect, PixelFormat.DontCare);
             Clipboard.SetImage(bmpCrop);
-            this.richTextBox.Text.Remove(finded,s.Length);
-            this.richTextBox.Paste();
+            richText.Text.Remove(finded,s.Length);
+            richText.Paste();
         }
         void DrawColors(int finded, string c)
         {
@@ -171,24 +174,24 @@ namespace NUC_Raw_Tools
 
             }
         }
-        private void richTextBox_TextChanged(object sender, EventArgs e)
+        public void Draw(RichTextBox richText)
         {
-            for (int start = 0; start < this.richTextBox.TextLength; start++)
+            for (int start = 0; start < richText.TextLength; start++)
             {
                 #region Botões(Verifier)
                 foreach (var s in simbols)
                 {
-                    int finded = this.richTextBox.Find(s, start, RichTextBoxFinds.None);
+                    int finded = richText.Find(s, start, RichTextBoxFinds.None);
                     if (finded != -1)
                     {
-                        DrawButtons(finded, s);
+                        DrawButtons(finded, s, richText);
                     }
                 }
                 #endregion
                 #region Cores (Verifier)
                 foreach (var c in colors)
                 {
-                    int finded = this.richTextBox.Find(c, start, RichTextBoxFinds.None);
+                    int finded = richText.Find(c, start, RichTextBoxFinds.None);
                     if (finded != -1)
                     {
                         DrawColors(finded, c);
@@ -196,6 +199,12 @@ namespace NUC_Raw_Tools
                 }
                 #endregion
             }
+        }
+        private void richTextBox_TextChanged(object sender, EventArgs e)
+        {
+            
+            editor.save();
+                    
         }
 
         public static void CopyRegionIntoImage(Bitmap srcBitmap, Rectangle srcRegion, ref Bitmap destBitmap, Rectangle destRegion)
