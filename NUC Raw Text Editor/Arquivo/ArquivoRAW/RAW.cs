@@ -114,48 +114,88 @@ namespace NUC_Raw_Tools.ArquivoRAW
         byte[] pastas;
         public void Rebuild(string location, string filename)
         {
+            #region Salvar
+            #region Pastas
             var files = new List<byte[]>();
             var pastabin = new List<byte>();
             int totalsizefold = 0;
             foreach (var pasta in Pastas)
             {
-                if (pasta.filescount != 0)
+                if (pasta.type == Types.Texto)
                 {
-                    var filebin = new List<byte>();
-                    byte[] count = BitConverter.GetBytes(Convert.ToUInt32(pasta.Arquivos.Count));
-                    filebin.AddRange(count);
-                    int totalsize = 0;
-                    foreach (var file in pasta.Arquivos)
-                    {
-                        byte[] position = BitConverter.GetBytes(Convert.ToUInt32(file.Position));
-                        byte[] size = BitConverter.GetBytes(Convert.ToUInt32(file.Size));
-                        filebin.AddRange(position);
-                        filebin.AddRange(size);
-                        totalsize += (int)file.Size;
-                    }
-                    while (filebin.Count != pasta.Arquivos[0].Position)
-                    {
-                        filebin.Add(0);
-                    }
-                    byte[] xfiles = new byte[totalsize + filebin.ToArray().Length + 0x20];
-                    Array.Copy(filebin.ToArray(), xfiles, filebin.Count);
-                    foreach (var file in pasta.Arquivos)
-                    {
-                        Array.Copy(file.FileData, 0, xfiles, (int)file.Position, (int)file.Size);
-                    }
+                    pasta.Size = pasta.texto.Size;
+                    byte[] xfiles = new byte[pasta.Size];
+                    Array.Copy(pasta.texto.Data, 0, xfiles, 0, (int)pasta.Size);
                     files.Add(xfiles);
-                    totalsizefold += (int)pasta.Size;
+                    pasta.Size = (uint)xfiles.Length;
+                    totalsizefold += xfiles.Length;
+                    byte[] index = BitConverter.GetBytes(Convert.ToUInt32(pasta.Index));
+                    byte[] position2 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Position));
+                    byte[] size2 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Size));
+                    pastabin.AddRange(index);
+                    pastabin.AddRange(size2);
+                    pastabin.AddRange(position2);
+                    pastabin.AddRange(new byte[4]); 
                 }
-                byte[] index = BitConverter.GetBytes(Convert.ToUInt32(pasta.Index));
-                byte[] position1 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Position));
-                byte[] size1 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Size));
-                pastabin.AddRange(index);
-                pastabin.AddRange(size1);
-                pastabin.AddRange(position1);
-                pastabin.AddRange(new byte[4]);
-                
+                else
+                {
+                    if (pasta.filescount != 0) //se a contagem de pastas é diferente de 0
+                    {
+                        #region Arquivos da Pasta
+                        #region Ponteiros do Arquivo
+                        var filebin = new List<byte>();
+                        byte[] count = BitConverter.GetBytes(Convert.ToUInt32(pasta.Arquivos.Count));
+                        filebin.AddRange(count);
+                        int totalsize = 0;
+                        byte[] size;
+                        foreach (var file in pasta.Arquivos)
+                        {
+                            if (file.type == Types.Texto)
+                            {
+                                file.Size = file.texto.Size;
+                            }
+                            byte[] position = BitConverter.GetBytes(Convert.ToUInt32(file.Position));
+                            size = BitConverter.GetBytes(Convert.ToUInt32(file.Size));
+                            totalsize += (int)file.Size;
+                            filebin.AddRange(position);
+                            filebin.AddRange(size);
 
+                        }
+                        while (filebin.Count != pasta.Arquivos[0].Position)
+                        {
+                            filebin.Add(0);
+                        }
+                        #endregion
+                        byte[] xfiles = new byte[totalsize + filebin.ToArray().Length + 0x20]; //esse ponto aqui MIGUEL!!
+                        Array.Copy(filebin.ToArray(), xfiles, filebin.Count);
+                        foreach (var file in pasta.Arquivos)
+                        {
+                            if (file.type == Types.Texto)
+                            {
+                                Array.Copy(file.texto.Data, 0, xfiles, (int)file.Position, (int)file.Size);
+
+                            }
+                            else
+                                Array.Copy(file.FileData, 0, xfiles, (int)file.Position, (int)file.Size);
+                        }
+                        files.Add(xfiles);
+                        pasta.Size = (uint)xfiles.Length;
+                        totalsizefold += xfiles.Length;
+                        #endregion
+                    }
+                    #region Ponteiros da Pasta
+                    byte[] index = BitConverter.GetBytes(Convert.ToUInt32(pasta.Index));
+                    byte[] position1 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Position));
+                    byte[] size1 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Size));
+                    pastabin.AddRange(index);
+                    pastabin.AddRange(size1);
+                    pastabin.AddRange(position1);
+                    pastabin.AddRange(new byte[4]);
+                }
+                #endregion
             }
+            #endregion
+            #region Salvar pastas
             pastas = new byte[totalsizefold + pastabin.Count];
             Array.Copy(pastabin.ToArray(), pastas, pastabin.Count);
             int i = 0;
@@ -164,9 +204,13 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 Array.Copy(past, 0, pastas, (int)Pastas[i].Position, (int)Pastas[i].Size);
                 i++;
             }
+            #endregion
             System.IO.File.WriteAllBytes(location+"/"+filename, pastas);
-            
-            
+            #endregion
+        }
+        public void Import()
+        {
+
         }
         public class Folder
         {
@@ -257,6 +301,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
             public uint Size;
             public uint SeqCount;
             public List<byte[]> sequences;
+            public List<int> seqpointers;
 
             public Text(byte[] file, int index)
             {
@@ -271,7 +316,41 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 {
                     sequences.Add(ReadSequence(Data, pos + (i * 4), "8001"));
                 }
-
+            }
+            public void Save()
+            {
+                //tamanho do bloco de pointers: Contagem *4 +4(contagem uint32)
+                #region Iniciar Array de Ponteiro/Texto
+                int tablesize = ((int)SeqCount * 4) + 4;
+                var table = new List<byte>();
+                table.AddRange(BitConverter.GetBytes(Convert.ToInt32(SeqCount)));
+                #endregion
+                int offset = tablesize;
+                for(int ia=0;ia<SeqCount;ia++)
+                {
+                    byte[] off = BitConverter.GetBytes(Convert.ToInt32(offset));
+                    table.AddRange(off);
+                    offset += sequences[ia].Length + 2;
+                }
+                foreach(var s in sequences)
+                {
+                    table.AddRange(s);
+                    table.Add(0);
+                    table.Add(0x80);
+                }
+                
+                Size = (uint)table.Count;
+                Data = new byte[Size];
+                Data = table.ToArray();
+            }
+            public int AllLength(List<byte[]> data)
+            {
+                int length = 0;
+                foreach(var d in data)
+                {
+                    length += d.Length+2;
+                }
+                return length;
             }
         }
         public class Texture

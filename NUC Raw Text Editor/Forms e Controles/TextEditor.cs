@@ -116,6 +116,7 @@ namespace NUC_Raw_Tools
         #region Botões e Início
         private void button5_Click(object sender, EventArgs e)
         {
+            TextRender();
             if(actual>=1|actual==seqs.Count)
             {
                 button4.Enabled = true;
@@ -132,6 +133,7 @@ namespace NUC_Raw_Tools
 
         private void button4_Click(object sender, EventArgs e)
         {
+            TextRender();
             if (actual == 2)
                 button4.Enabled = false;
             if (actual >= 1)
@@ -149,7 +151,18 @@ namespace NUC_Raw_Tools
         }
         public void save()
         {
-            File.WriteAllBytes("text" + actual.ToString() + ".bin", Encodings.Naruto.UzumakiChronicles2.GetBytes(nrtb2.RichTextBox.Text));
+            switch (p01.treeView1.SelectedNode.Level)
+            {
+                case 1:
+                    p01.rawfile.Pastas[p01.treeView1.SelectedNode.Index].texto.sequences[actual - 1] = Encodings.Naruto.UzumakiChronicles2.GetBytes(nrtb2.RichTextBox.Text);
+                    p01.rawfile.Pastas[p01.treeView1.SelectedNode.Index].texto.Save();
+
+                    break;
+                case 2:
+                    p01.rawfile.Pastas[p01.treeView1.SelectedNode.Parent.Index].Arquivos[p01.treeView1.SelectedNode.Index].texto.sequences[actual-1] = Encodings.Naruto.UzumakiChronicles2.GetBytes(nrtb2.RichTextBox.Text);
+                    p01.rawfile.Pastas[p01.treeView1.SelectedNode.Parent.Index].Arquivos[p01.treeView1.SelectedNode.Index].texto.Save();
+                    break;
+            }
             nrtb1.RichTextBox.Text = nrtb2.RichTextBox.Text;
             nrtb1.Draw(nrtb1.RichTextBox);
         }

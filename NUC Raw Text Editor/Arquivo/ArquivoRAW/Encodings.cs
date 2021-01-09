@@ -32,9 +32,15 @@ namespace NUC_Raw_Tools
                     for(int i =0;i<s.Length;i++)
                     {
                         int j = 0;
-                        foreach(var w in llv.words)
+                        if (s[i].ToString() == "\n")
                         {
-
+                            byte[] str = BitConverter.GetBytes(Convert.ToInt16("0180", 16));
+                            Array.Reverse(str);
+                            seq.AddRange(str);
+                        }
+                        foreach (var w in llv.words)
+                        {
+                            
                                 if (s[i].ToString() == w&&s[i].ToString()!="%")
                                 {
                                     byte[] str = BitConverter.GetBytes(Convert.ToInt16(llv.vals[j], 16));

@@ -31,7 +31,6 @@ namespace NUC_Raw_Tools
             InitializeComponent();
             CheckRecent();
         }
-
         #region Elementos Funcionais e Visuais
 
         void ShowHide()
@@ -113,6 +112,7 @@ namespace NUC_Raw_Tools
             {
                 case 1:
                     exportarToolStripMenuItem.Enabled = true;
+                    importarToolStripMenuItem.Enabled = true;
                     exportarTexturaToolStripMenuItem.Enabled = false;
                     #region Verificar se é texto
                     if (rawfile.Pastas[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
@@ -124,6 +124,7 @@ namespace NUC_Raw_Tools
 
                 case 2:
                     exportarToolStripMenuItem.Enabled = true;
+                    importarToolStripMenuItem.Enabled = true;
                     exportarTexturaToolStripMenuItem.Enabled = false;
                     #region Verificar se é texto
                     if (rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
@@ -142,6 +143,7 @@ namespace NUC_Raw_Tools
                 default:
                     exportarTexturaToolStripMenuItem.Enabled = false;
                     exportarToolStripMenuItem.Enabled = false;
+                    importarToolStripMenuItem.Enabled = false;
                     importarTexturaToolStripMenuItem.Enabled = false;
                     Editar.Enabled = false;
                     break;
@@ -388,7 +390,41 @@ namespace NUC_Raw_Tools
                         break;
                 }
             }
-        }        
+        }
+        void Import(TreeView list, RAW file)
+        {
+            var import = new OpenFileDialog();
+            import.Filter = "Arquivo RAW|*.raw,*.sraw,*.bin";
+            if (import.ShowDialog() == DialogResult.OK)
+            {
+                byte[] filebin = File.ReadAllBytes(import.FileName);
+                switch (treeView1.SelectedNode.Level)
+                {
+                    case 1:
+                        if (((int)RAW.ReadUInt(filebin, 8, RAW.Int.UInt32) / 0xF) != 0)
+                        {
+                            file.Pastas[treeView1.SelectedNode.Index].FileData = new byte[filebin.Length];
+                            file.Pastas[treeView1.SelectedNode.Index].Size = (uint)filebin.Length;
+                            Array.Copy(filebin, file.Pastas[treeView1.SelectedNode.Index].FileData, filebin.Length);
+                            MessageBox.Show("Importado!" + "\nLembre-se de salvar!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                            MessageBox.Show("Arquivo incompatível!" + "\nVerifique a estrutura do container!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                    case 2:
+                        if (filebin[0] != 0)
+                        {
+                            file.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].FileData = new byte[filebin.Length];
+                            file.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].Size = (uint)filebin.Length;
+                            Array.Copy(filebin, file.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].FileData, filebin.Length);
+                            MessageBox.Show("Importado!" + "\nLembre-se de salvar!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                            MessageBox.Show("Arquivo incompatível!" + "\nVerifique a estrutura do container!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                }
+            }
+        }
         public void CheckRecent()
         {
             recenteToolStripMenuItem.Enabled = false;
@@ -428,13 +464,19 @@ namespace NUC_Raw_Tools
             File.WriteAllLines("recent.txt", result.ToArray());
             CheckRecent();
         }
+        private void importarTexturaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+        }
+        private void importarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Import(treeView1, rawfile);
+
+        }
         void EditarTexto()
         {
             TextEditor editor = new TextEditor(this);
             editor.ShowDialog();
         }
         #endregion
-
-        
     }
 }
