@@ -130,7 +130,6 @@ namespace NUC_Raw_Tools
             nrtb2.RichTextBox.Text = seqs[actual-1];
             label2.Text = "Sequência: "+actual + " de " + seqs.Count;
         }
-
         private void button4_Click(object sender, EventArgs e)
         {
             TextRender();

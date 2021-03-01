@@ -11,6 +11,8 @@ using System.IO;
 #region Usando RainbowImgLib https://github.com/marco-calautti/Rainbow/tree/master/Rainbow.ImgLib
 using Rainbow.ImgLib;
 using Microsoft.Win32;
+using System.Reflection;
+using System.Xml;
 #endregion
 namespace NUC_Raw_Tools.ArquivoRAW
 {
@@ -87,6 +89,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
               
             }
             tree.Nodes.Add(Raiz);
+            tree.ExpandAll();
         }
         #region Estruturas
         /*
@@ -111,111 +114,84 @@ namespace NUC_Raw_Tools.ArquivoRAW
             ...
     */
         #endregion
-        byte[] pastas;
-        public void Rebuild(string location, string filename)
+        public void Rebuild(RAW raw, string path, string name)
         {
-            #region Salvar
-            #region Pastas
-            var files = new List<byte[]>();
-            var pastabin = new List<byte>();
-            int totalsizefold = 0;
-            foreach (var pasta in Pastas)
+            #region Ponteiros e Pastas no ROOT
+            var root = new List<byte>();
+            int offset = 0x10 * raw.folderCount;
+            foreach (Folder folder in raw.Pastas)
             {
-                if (pasta.type == Types.Texto)
+                var folderoot = new List<byte>();
+                int foldoffset = (int)ReadUInt(folder.FileData, 4, Int.UInt32);
+                int fileoffset = (int)ReadUInt(folder.FileData, 4, Int.UInt32);
+                #region Ponteiros e Arquivos
+                folderoot.AddRange(BitConverter.GetBytes((UInt32)folder.filescount));
+                foreach (File arquivo in folder.Arquivos)
                 {
-                    pasta.Size = pasta.texto.Size;
-                    byte[] xfiles = new byte[pasta.Size];
-                    Array.Copy(pasta.texto.Data, 0, xfiles, 0, (int)pasta.Size);
-                    files.Add(xfiles);
-                    pasta.Size = (uint)xfiles.Length;
-                    totalsizefold += xfiles.Length;
-                    byte[] index = BitConverter.GetBytes(Convert.ToUInt32(pasta.Index));
-                    byte[] position2 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Position));
-                    byte[] size2 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Size));
-                    pastabin.AddRange(index);
-                    pastabin.AddRange(size2);
-                    pastabin.AddRange(position2);
-                    pastabin.AddRange(new byte[4]); 
-                }
-                else
-                {
-                    if (pasta.filescount != 0) //se a contagem de pastas é diferente de 0
+                    var fileroot = new List<byte>();
+                    if (arquivo.type == Types.Texto)
                     {
-                        #region Arquivos da Pasta
-                        #region Ponteiros do Arquivo
-                        var filebin = new List<byte>();
-                        byte[] count = BitConverter.GetBytes(Convert.ToUInt32(pasta.Arquivos.Count));
-                        filebin.AddRange(count);
-                        int totalsize = 0;
-                        byte[] size;
-                        foreach (var file in pasta.Arquivos)
-                        {
-                            if (file.type == Types.Texto)
-                            {
-                                file.Size = file.texto.Size;
-                            }
-                            byte[] position = BitConverter.GetBytes(Convert.ToUInt32(file.Position));
-                            size = BitConverter.GetBytes(Convert.ToUInt32(file.Size));
-                            totalsize += (int)file.Size;
-                            filebin.AddRange(position);
-                            filebin.AddRange(size);
-
-                        }
-                        while (filebin.Count != pasta.Arquivos[0].Position)
-                        {
-                            filebin.Add(0);
-                        }
-                        #endregion
-                        byte[] xfiles = new byte[totalsize + filebin.ToArray().Length + 0x20]; //esse ponto aqui MIGUEL!!
-                        Array.Copy(filebin.ToArray(), xfiles, filebin.Count);
-                        foreach (var file in pasta.Arquivos)
-                        {
-                            if (file.type == Types.Texto)
-                            {
-                                Array.Copy(file.texto.Data, 0, xfiles, (int)file.Position, (int)file.Size);
-
-                            }
-                            else
-                                Array.Copy(file.FileData, 0, xfiles, (int)file.Position, (int)file.Size);
-                        }
-                        files.Add(xfiles);
-                        pasta.Size = (uint)xfiles.Length;
-                        totalsizefold += xfiles.Length;
-                        #endregion
+                        fileroot.AddRange(arquivo.texto.Data);
+                        if (arquivo.ZeroCount != 0)
+                            fileroot.AddRange(new byte[arquivo.ZeroCount]);
+                        arquivo.FileData = new byte[arquivo.texto.Data.Length+arquivo.ZeroCount];
+                        arquivo.FileData = fileroot.ToArray();
                     }
-                    #region Ponteiros da Pasta
-                    byte[] index = BitConverter.GetBytes(Convert.ToUInt32(pasta.Index));
-                    byte[] position1 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Position));
-                    byte[] size1 = BitConverter.GetBytes(Convert.ToUInt32(pasta.Size));
-                    pastabin.AddRange(index);
-                    pastabin.AddRange(size1);
-                    pastabin.AddRange(position1);
-                    pastabin.AddRange(new byte[4]);
+                    else
+                    {
+                        if (arquivo.TrueSIZE > 0)
+                            fileroot.AddRange(arquivo.FileData);
+                        if(arquivo.ZeroCount!=0)
+                           fileroot.AddRange(new byte[arquivo.ZeroCount]);
+                        if (arquivo.TrueSIZE > 0)
+                        {
+                            arquivo.FileData = new byte[arquivo.TrueSIZE];
+                            arquivo.FileData = fileroot.ToArray();
+                        }
+                        else
+                            arquivo.FileData = new byte[0];
+                    }
+                    if (!folder.hasNullFile)
+                    {
+                        folderoot.AddRange(BitConverter.GetBytes((UInt32)fileoffset));//posição
+                        folderoot.AddRange(BitConverter.GetBytes((UInt32)(fileroot.Count - arquivo.ZeroCount)));//size
+                        fileoffset += arquivo.FileData.Length;
+                    }
+                    else
+                    {
+                        folderoot.AddRange(BitConverter.GetBytes((UInt32)fileoffset));//posição
+                        folderoot.AddRange(BitConverter.GetBytes((UInt32)(fileroot.Count - arquivo.ZeroCount)));//size
+                        MessageBox.Show(arquivo.ZeroCount.ToString("X2"));                  
+                    }
                 }
+                while (folderoot.Count != foldoffset)
+                {
+                    folderoot.Add(0);
+                }
+                foreach (File arquivo in folder.Arquivos)
+                {
+                    folderoot.AddRange(arquivo.FileData);
+                }
+                folder.FileData = new byte[folderoot.Count];
+                folder.FileData = folderoot.ToArray();
                 #endregion
+                root.AddRange(BitConverter.GetBytes((UInt32)folder.Index));
+                root.AddRange(BitConverter.GetBytes((UInt32)folder.FileData.Length));
+                root.AddRange(BitConverter.GetBytes((UInt32)offset));
+                root.AddRange(BitConverter.GetBytes((UInt32)0));
+                offset += folder.FileData.Length;
             }
+            foreach (Folder fold in raw.Pastas)
+                root.AddRange(fold.FileData);
             #endregion
-            #region Salvar pastas
-            pastas = new byte[totalsizefold + pastabin.Count];
-            Array.Copy(pastabin.ToArray(), pastas, pastabin.Count);
-            int i = 0;
-            foreach (var past in files)
-            {
-                Array.Copy(past, 0, pastas, (int)Pastas[i].Position, (int)Pastas[i].Size);
-                i++;
-            }
+            #region Salvar o arquivo
+            System.IO.File.WriteAllBytes(path + @"/" + name, root.ToArray());
             #endregion
-            System.IO.File.WriteAllBytes(location+"/"+filename, pastas);
-            #endregion
-        }
-        public void Import()
-        {
-
         }
         public class Folder
         {
             public uint Index;
-            public uint Position;
+             uint Position;
             public uint Size;
             public byte[] FileData;
             public Text texto;
@@ -223,6 +199,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
             public List<File> Arquivos;
             public Texture textura;
             public int filescount;
+            public bool hasNullFile = false;
             public Folder(byte[] Data, int index, byte alfa)
             {
                 #region Pasta de arquivos
@@ -256,13 +233,13 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     Arquivos.Add(new File(this, i, alfa));
                 }
                 #endregion
-
+                
             }
 
         }
         public class File
         {
-            public int Index;
+            public int Index, TrueSIZE,ZeroCount;
             public uint Position;
             public uint Size;
             public Types type = Types.Unknow;
@@ -274,7 +251,19 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 Index = index;
                 Position = (uint)ReadUInt(folder.FileData, 4 + (8 * (index)) , Int.UInt32);
                 Size = (uint)ReadUInt(folder.FileData, 8 + (8 * (index)), Int.UInt32);
+                if (Size == 0)
+                    folder.hasNullFile = true;
+                if (Position != 0)
+                {
+                    if (index == folder.filescount - 1)
+                        TrueSIZE = folder.FileData.Length - (int)ReadUInt(folder.FileData, 4 + (8 * (index)), Int.UInt32);
+                    else
+                        TrueSIZE = (int)ReadUInt(folder.FileData, 4 + (8 * (index + 1)), Int.UInt32) - (int)Position;
+                }
                 FileData = Bin.ReadBlock(folder.FileData, Position, Size);
+                ZeroCount = TrueSIZE - (int)Size;
+                if (ZeroCount < 0)
+                    ZeroCount = 0;
                 if (FileData.Length > 20)
                 {
                     if (ReadUInt(FileData, FileData.Length - 2, Int.UInt16).ToString("X2") == "8000")
@@ -290,7 +279,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 }
                 //MessageBox.Show("Índice: " + Index.ToString() + "\n" +
                 //    "Posição: " + Position.ToString("X2") + "\n" +
-                //    "Tamanho: " + Size.ToString("X2"));
+                //    "Tamanho: " + TrueSIZE.ToString("X2"));
             }
         }
         public class Text
@@ -342,6 +331,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 Size = (uint)table.Count;
                 Data = new byte[Size];
                 Data = table.ToArray();
+                
             }
             public int AllLength(List<byte[]> data)
             {
@@ -451,6 +441,8 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 #endregion
                 #region Converter TEX e CLUT para Imagens
                 int i = 0;
+                bool argument=false;
+                int errcount = 0;
                 foreach(TextureDATA.CLUTs clut in CLUTs) {
                     if (clut.bpp == 8)
                     {
@@ -458,12 +450,19 @@ namespace NUC_Raw_Tools.ArquivoRAW
                         clut.ChangeAlfa(alfa);
                         Color[] colors = Rainbow.ImgLib.Encoding.ColorCodec.CODEC_32BIT_RGBA.DecodeColors(clut.CLUT);
                         colors = unswizzlePalette(colors);
-                        unswizzled = UnSwizzle8(TEXs[i].width, TEXs[i].height, TEXs[i].TEX);
-                        Rainbow.ImgLib.Encoding.ImageDecoderIndexed imageDecoder = new Rainbow.ImgLib.Encoding.ImageDecoderIndexed(unswizzled, TEXs[i].width, TEXs[i].height, Rainbow.ImgLib.Encoding.IndexCodec.FromNumberOfColors(256, Rainbow.ImgLib.Common.ByteOrder.BigEndian), colors);
-                        images.Add(imageDecoder.DecodeImage());
+                        try
+                        {
+                            unswizzled = UnSwizzle8(TEXs[i].width, TEXs[i].height, TEXs[i].TEX);
+                            Rainbow.ImgLib.Encoding.ImageDecoderIndexed imageDecoder = new Rainbow.ImgLib.Encoding.ImageDecoderIndexed(unswizzled, TEXs[i].width, TEXs[i].height, Rainbow.ImgLib.Encoding.IndexCodec.FromNumberOfColors(256, Rainbow.ImgLib.Common.ByteOrder.BigEndian), colors);
+                            images.Add(imageDecoder.DecodeImage());
+                        }
+                        catch (ArgumentOutOfRangeException) { errcount++; argument = true; }
                     }
                     i++;
                 }
+                if(argument)
+                    MessageBox.Show("Contém "+errcount+" texturas não processadas corretamente!",
+                        "Aviso!",MessageBoxButtons.OK, MessageBoxIcon.Warning); 
                 #endregion
             }
 
@@ -682,6 +681,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
             Texto,
             Textura,
             Unknow,
+            Cutscene,
             CLT,
             TEX
         };

@@ -42,6 +42,7 @@ namespace NUC_Raw_Tools
             fecharToolStripMenuItem.Enabled = !fecharToolStripMenuItem.Enabled;
             groupBox1.Visible = !groupBox1.Visible;
             treeView1.Visible = !treeView1.Visible;
+            label2.Visible = !label2.Visible;
             Button[] buttons = { Editar};
             foreach (var b in buttons)
                 b.Visible = !b.Visible;
@@ -114,6 +115,7 @@ namespace NUC_Raw_Tools
                     exportarToolStripMenuItem.Enabled = true;
                     importarToolStripMenuItem.Enabled = true;
                     exportarTexturaToolStripMenuItem.Enabled = false;
+                    label2.Text = "Tamanho[HEX]: " + rawfile.Pastas[treeView1.SelectedNode.Index].Size.ToString("X2");
                     #region Verificar se é texto
                     if (rawfile.Pastas[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
                         Editar.Enabled = true;
@@ -126,6 +128,7 @@ namespace NUC_Raw_Tools
                     exportarToolStripMenuItem.Enabled = true;
                     importarToolStripMenuItem.Enabled = true;
                     exportarTexturaToolStripMenuItem.Enabled = false;
+                    label2.Text = "Tamanho[HEX]: "+rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].Size.ToString("X2");
                     #region Verificar se é texto
                     if (rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
                         Editar.Enabled = true;
@@ -137,7 +140,6 @@ namespace NUC_Raw_Tools
                 case 3:
                     exportarTexturaToolStripMenuItem.Enabled = true;
                     exportarToolStripMenuItem.Enabled = false;
-                    
                     break;
 
                 default:
@@ -250,7 +252,7 @@ namespace NUC_Raw_Tools
         }
         private void salvarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            rawfile.Rebuild(pathf, rawname);
+            rawfile.Rebuild(rawfile, pathf, rawname);
         }
         private void button4_Click(object sender, EventArgs e)
         {
@@ -263,7 +265,7 @@ namespace NUC_Raw_Tools
             save.FileName = rawname.Substring(0, rawname.Length - 4);
             if(save.ShowDialog()==DialogResult.OK)
             {
-                rawfile.Rebuild(Path.GetDirectoryName(save.FileName), Path.GetFileName(save.FileName));
+                rawfile.Rebuild(rawfile,Path.GetDirectoryName(save.FileName), Path.GetFileName(save.FileName));
                 MessageBox.Show("Concluído!", "Êxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -404,7 +406,7 @@ namespace NUC_Raw_Tools
                         if (((int)RAW.ReadUInt(filebin, 8, RAW.Int.UInt32) / 0xF) != 0)
                         {
                             file.Pastas[treeView1.SelectedNode.Index].FileData = new byte[filebin.Length];
-                            file.Pastas[treeView1.SelectedNode.Index].Size = (uint)filebin.Length;
+                            //file.Pastas[treeView1.SelectedNode.Index].Size = (uint)filebin.Length;
                             Array.Copy(filebin, file.Pastas[treeView1.SelectedNode.Index].FileData, filebin.Length);
                             MessageBox.Show("Importado!" + "\nLembre-se de salvar!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
@@ -415,7 +417,7 @@ namespace NUC_Raw_Tools
                         if (filebin[0] != 0)
                         {
                             file.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].FileData = new byte[filebin.Length];
-                            file.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].Size = (uint)filebin.Length;
+                            //file.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].Size = (uint)filebin.Length;
                             Array.Copy(filebin, file.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].FileData, filebin.Length);
                             MessageBox.Show("Importado!" + "\nLembre-se de salvar!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
