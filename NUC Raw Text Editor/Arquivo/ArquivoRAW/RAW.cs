@@ -25,16 +25,17 @@ namespace NUC_Raw_Tools.ArquivoRAW
         {
             #region Abertura e verificar se é pasta
             Data = opened;
-            folderCount = (int)ReadUInt(Data, 8, Int.UInt32)/0xF;
+            folderCount = (int)ReadUInt(Data, 8, Int.UInt32)/0x10;
             if(folderCount==0)
             {
-                MessageBox.Show("Erro: Arquivo inválido(0 Pastas lidas)!!");
+                MessageBox.Show("Erro: Arquivo inválido!!");
                 return;
             }
             Pastas = new List<Folder>();
             for (int i = 0; i < folderCount; i++)
             {
-                Pastas.Add(new Folder(Data, i,alfa));
+                //if (ReadUInt(Data, 4, Int.UInt32) > 0xf)
+                    Pastas.Add(new Folder(Data, i, alfa));
             }
             #endregion
             
@@ -53,6 +54,10 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 else if (folder.type == Types.Textura)
                     Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i + " -Textura");
                 else if (folder.type==Types.Unknow)
+                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i+ " -Unknow");
+                else if (folder.type == Types.Link)
+                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i + " -Link");
+                else
                     Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i);
                 try
                 {
@@ -76,9 +81,13 @@ namespace NUC_Raw_Tools.ArquivoRAW
 
                             }
                             else if (file.type == Types.Unknow)
+                                Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j + " -Unknow");
+                            else if (file.type == Types.Link)
+                                Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j + " -Link");
+                            else if (file.type == Types.Null)
+                                Raiz2.Nodes.Add("Espaço reservado - Vazio"); 
+                            else
                                 Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j);
-                            
-
                             j++;
                         }
                     }
@@ -90,6 +99,43 @@ namespace NUC_Raw_Tools.ArquivoRAW
             }
             tree.Nodes.Add(Raiz);
             tree.ExpandAll();
+            #region Colorir Tipos
+            int f = 0;
+            foreach(TreeNode node in tree.Nodes)
+            {
+                int k = 0;
+                foreach(TreeNode treeNode in node.Nodes)
+                {
+                    int c = 0;
+                    foreach(TreeNode node1 in treeNode.Nodes)
+                    {
+                        switch(raw.Pastas[k].Arquivos[c].type)
+                        {
+                            case Types.Link:
+                                node1.ForeColor = Color.DarkGreen;
+                                break;
+                            case Types.Null:
+                                node1.ForeColor = Color.Red;
+                                break;
+                            case Types.Texto:
+                                node1.ForeColor = Color.Blue;
+                                break;
+                            case Types.Unknow:
+                                node1.ForeColor = Color.DarkGray;
+                                break;
+                            case Types.Textura:
+                                node1.ForeColor = Color.Chocolate;
+                                break;
+                        }
+                        
+                        c++;
+                    }
+                    k++;
+                }
+                f++;
+            }
+
+            #endregion
         }
         #region Estruturas
         /*
@@ -114,6 +160,29 @@ namespace NUC_Raw_Tools.ArquivoRAW
             ...
     */
         #endregion
+        public void ColorChild(TreeNode nodes, int indx, Color color)
+        {
+            foreach (TreeNode node_tmp in nodes.Nodes[indx].Nodes)
+            {
+                node_tmp.ForeColor = color;
+                foreach (TreeNode node_tmp2 in node_tmp.Nodes)
+                {
+                    node_tmp2.ForeColor = color;
+                    foreach (TreeNode node_tmp3 in node_tmp2.Nodes)
+                    {
+                        node_tmp3.ForeColor = color;
+                        foreach (TreeNode node_tmp4 in node_tmp3.Nodes)
+                        {
+                            node_tmp4.ForeColor = color;
+                            foreach (TreeNode node_tmp5 in node_tmp4.Nodes)
+                            {
+                                node_tmp5.ForeColor = color;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         public void Rebuild(RAW raw, string path, string name)
         {
             #region Ponteiros e Pastas no ROOT
@@ -121,65 +190,20 @@ namespace NUC_Raw_Tools.ArquivoRAW
             int offset = 0x10 * raw.folderCount;
             foreach (Folder folder in raw.Pastas)
             {
-                var folderoot = new List<byte>();
-                int foldoffset = (int)ReadUInt(folder.FileData, 4, Int.UInt32);
-                int fileoffset = (int)ReadUInt(folder.FileData, 4, Int.UInt32);
-                #region Ponteiros e Arquivos
-                folderoot.AddRange(BitConverter.GetBytes((UInt32)folder.filescount));
-                foreach (File arquivo in folder.Arquivos)
-                {
-                    var fileroot = new List<byte>();
-                    if (arquivo.type == Types.Texto)
-                    {
-                        fileroot.AddRange(arquivo.texto.Data);
-                        if (arquivo.ZeroCount != 0)
-                            fileroot.AddRange(new byte[arquivo.ZeroCount]);
-                        arquivo.FileData = new byte[arquivo.texto.Data.Length+arquivo.ZeroCount];
-                        arquivo.FileData = fileroot.ToArray();
-                    }
-                    else
-                    {
-                        if (arquivo.TrueSIZE > 0)
-                            fileroot.AddRange(arquivo.FileData);
-                        if(arquivo.ZeroCount!=0)
-                           fileroot.AddRange(new byte[arquivo.ZeroCount]);
-                        if (arquivo.TrueSIZE > 0)
-                        {
-                            arquivo.FileData = new byte[arquivo.TrueSIZE];
-                            arquivo.FileData = fileroot.ToArray();
-                        }
-                        else
-                            arquivo.FileData = new byte[0];
-                    }
-                    if (!folder.hasNullFile)
-                    {
-                        folderoot.AddRange(BitConverter.GetBytes((UInt32)fileoffset));//posição
-                        folderoot.AddRange(BitConverter.GetBytes((UInt32)(fileroot.Count - arquivo.ZeroCount)));//size
-                        fileoffset += arquivo.FileData.Length;
-                    }
-                    else
-                    {
-                        folderoot.AddRange(BitConverter.GetBytes((UInt32)fileoffset));//posição
-                        folderoot.AddRange(BitConverter.GetBytes((UInt32)(fileroot.Count - arquivo.ZeroCount)));//size
-                        MessageBox.Show(arquivo.ZeroCount.ToString("X2"));                  
-                    }
-                }
-                while (folderoot.Count != foldoffset)
-                {
-                    folderoot.Add(0);
-                }
-                foreach (File arquivo in folder.Arquivos)
-                {
-                    folderoot.AddRange(arquivo.FileData);
-                }
-                folder.FileData = new byte[folderoot.Count];
-                folder.FileData = folderoot.ToArray();
-                #endregion
+                int padd = 0;
+                folder.SaveChanges();
                 root.AddRange(BitConverter.GetBytes((UInt32)folder.Index));
                 root.AddRange(BitConverter.GetBytes((UInt32)folder.FileData.Length));
                 root.AddRange(BitConverter.GetBytes((UInt32)offset));
                 root.AddRange(BitConverter.GetBytes((UInt32)0));
                 offset += folder.FileData.Length;
+                while (offset % 0x10 != 0)
+                {
+                    offset++;
+                    padd++;
+                }
+                folder.Size += (uint)padd;
+                Array.Resize(ref folder.FileData, (int)folder.Size);
             }
             foreach (Folder fold in raw.Pastas)
                 root.AddRange(fold.FileData);
@@ -191,15 +215,14 @@ namespace NUC_Raw_Tools.ArquivoRAW
         public class Folder
         {
             public uint Index;
-             uint Position;
+            uint Position;
             public uint Size;
+            public int filescount;
             public byte[] FileData;
             public Text texto;
-            public Types type = Types.Unknow;
             public List<File> Arquivos;
             public Texture textura;
-            public int filescount;
-            public bool hasNullFile = false;
+            public Types type = Types.Unknow;
             public Folder(byte[] Data, int index, byte alfa)
             {
                 #region Pasta de arquivos
@@ -218,7 +241,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     if (ReadUInt(FileData, FileData.Length - 2, Int.UInt16).ToString("X2") == "8000")
                     {
                         type = Types.Texto;
-                        texto = new Text(FileData, index);
+                        texto = new Text(null,this, index);
                     }
                     if (ReadUInt(FileData, 16, Int.UInt32).ToString("X2") == "8004")
                     {
@@ -227,19 +250,156 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     }
                     return;
                 }
-                Arquivos = new List<File>();
-                for (int i = 0; i < filescount; i++)
+                int test = (int)ReadUInt(FileData, 4, Int.UInt32) - ((int)ReadUInt(FileData, 0, Int.UInt32) * 8);
+                int soma = 0;
+                if (test < (int)ReadUInt(FileData, 4, Int.UInt32)&&test>0)
+                    soma = test + ((int)ReadUInt(FileData, 0, Int.UInt32) * 8);
+                if ((int)ReadUInt(FileData, 4, Int.UInt32)!=0&&test< (int)ReadUInt(FileData, 4, Int.UInt32) && soma == (int)ReadUInt(FileData, 4, Int.UInt32))
                 {
-                    Arquivos.Add(new File(this, i, alfa));
+                    Arquivos = new List<File>();
+                    for (int i = 0; i < filescount; i++)
+                    {
+                        Arquivos.Add(new File(this, i, alfa));
+                    }
+                    #region Separar LINKS nos arquivos
+                    foreach (var file in Arquivos)
+                    {
+                        if (file.type == Types.Link)
+                        {
+                            foreach (var searchfile in Arquivos)
+                                if (file.Position == searchfile.Position && searchfile.type != Types.Link)
+                                    file.LinkerIndex = searchfile.Index;
+                        }
+                    }
+                    #endregion
+                    #region Separar Padding nos arquivos
+                    var verifier = new List<File>();
+                    foreach(var fi in Arquivos)
+                    {
+                        if (fi.Position!=0&&fi.type!=Types.Null&&fi.type!=Types.Link&&fi.type!=Types.Empty)
+                        {
+                            verifier.Add(fi);
+                        }
+                    }
+                    int padd = 0;
+                    for (int l =0;l< verifier.Count;l++)
+                    {
+                        
+                            if (l == verifier.Count-1)
+                            {
+                                padd = FileData.Length - (int)verifier[l].Position;
+                            }
+                            else if(l!=verifier.Count)
+                            {
+                            padd = (int)(verifier[l + 1].Position - verifier[l].Position);
+                            }
+                            verifier[l].Padding = padd - (int)verifier[l].Size;
+                    }
+                    for(int k = 0;k<Arquivos.Count;k++)
+                    {
+                        foreach(var f in verifier)
+                        {
+                            if (f.Index == Arquivos[k].Index)
+                                Arquivos[k] = f;
+                        }
+                    }
+                    //Teste de padding:
+                    //foreach(var p in Arquivos)
+                    //{
+                    //    if(p.type!=Types.Null&&p.type!=Types.Link&&p.type!=Types.Empty)
+                    //      MessageBox.Show("Padding: " + p.Padding.ToString("X2"));
+                    //}
+                    #endregion
                 }
                 #endregion
-                
-            }
 
+                //Teste dos Links
+                //foreach (var arq in Arquivos)
+                //    if (arq.type == Types.Link)
+                //    {
+                //        MessageBox.Show("Posição: " + arq.Position.ToString("X2")+"\n"+
+                //            "Size: " + Arquivos[arq.LinkerIndex].Size.ToString("X2")+"\n"+
+                //            "Tipo do link: "+ Arquivos[arq.LinkerIndex].type.ToString()+"\n"+
+                //            "Atalho para: "+arq.LinkerIndex.ToString());
+                //    }
+            }
+            public void SaveChanges()
+            {
+                int foffset = (int)ReadUInt(FileData, 4, Int.UInt32);
+                #region Salvar tipos
+                //foreach(var fi in Arquivos)
+                //{
+                //    if (fi.type != Types.Null && fi.type != Types.Link && fi.type != Types.Empty)
+                //    {
+                //        switch (fi.type)
+                //        {
+                //            case Types.Texto:
+                //                fi.Size = fi.texto.Size;
+                //                fi.FileData = new byte[fi.texto.Size];
+                //                fi.FileData = fi.texto.Data;
+                //                break;
+                //        }
+                //    }
+                //}
+                #endregion//NULL
+                #region Calcular novas Posições
+                int offset = foffset;
+                foreach (var file in Arquivos)
+                {
+                    if(file.type!=Types.Null&&file.type!=Types.Link&&file.type!=Types.Empty)
+                    {
+                        int padd = 0;
+                        file.Position = (uint)offset;
+                        offset += (int)file.Size;
+                        while(offset%0x10!=0)
+                        {
+                            offset++;
+                            padd++;
+                        }
+                        Array.Resize(ref file.FileData, ((int)file.Size)+padd);
+                    }
+                }
+                foreach(var f in Arquivos)
+                {
+                    if(f.type==Types.Link)
+                    {
+                        f.Position = Arquivos[f.LinkerIndex].Position;
+                    }
+                }//Linkar os LINKS
+                #endregion
+                #region Tabela de Ponteiros
+                var ptable = new List<byte>();
+                //Adicionar a contagem de arquivos
+                ptable.AddRange(BitConverter.GetBytes((UInt32)filescount));
+                #region Para cada arquivo
+                for (int i =0;i<filescount;i++)
+                {
+                    ptable.AddRange(BitConverter.GetBytes((UInt32)Arquivos[i].Position));
+                    ptable.AddRange(BitConverter.GetBytes((UInt32)Arquivos[i].Size));
+                }
+                #endregion
+                while(ptable.Count!=foffset)
+                {
+                    ptable.Add(0);
+                }//Enquanto a quantia diferir o total, adicionar padding no fim da tabela
+                #endregion
+                #region Adicionar arquivos
+                foreach (var fsav in Arquivos)
+                {
+                    if (fsav.type != Types.Null && fsav.type != Types.Link && fsav.type != Types.Empty)
+                    {
+                        ptable.AddRange(fsav.FileData);
+                    }
+                }
+                FileData = new byte[ptable.Count];
+                FileData = ptable.ToArray();
+                Size = (uint)FileData.Length;
+                #endregion
+            }
         }
         public class File
         {
-            public int Index, TrueSIZE,ZeroCount;
+            public int Index, Padding,LinkerIndex;
             public uint Position;
             public uint Size;
             public Types type = Types.Unknow;
@@ -248,38 +408,41 @@ namespace NUC_Raw_Tools.ArquivoRAW
             public Texture textura;
             public File(Folder folder, int index,byte alfa)
             {
+                #region Arquivo
                 Index = index;
                 Position = (uint)ReadUInt(folder.FileData, 4 + (8 * (index)) , Int.UInt32);
                 Size = (uint)ReadUInt(folder.FileData, 8 + (8 * (index)), Int.UInt32);
-                if (Size == 0)
-                    folder.hasNullFile = true;
-                if (Position != 0)
-                {
-                    if (index == folder.filescount - 1)
-                        TrueSIZE = folder.FileData.Length - (int)ReadUInt(folder.FileData, 4 + (8 * (index)), Int.UInt32);
-                    else
-                        TrueSIZE = (int)ReadUInt(folder.FileData, 4 + (8 * (index + 1)), Int.UInt32) - (int)Position;
-                }
                 FileData = Bin.ReadBlock(folder.FileData, Position, Size);
-                ZeroCount = TrueSIZE - (int)Size;
-                if (ZeroCount < 0)
-                    ZeroCount = 0;
-                if (FileData.Length > 20)
+                #endregion
+                #region Separar os Tipos
+                if (FileData.Length == 0 && Position != 0)
                 {
+                    type = Types.Link;
+                }
+                else if (FileData.Length > 0)
+                {
+                    type = Types.Unknow;
                     if (ReadUInt(FileData, FileData.Length - 2, Int.UInt16).ToString("X2") == "8000")
                     {
                         type = Types.Texto;
-                        texto = new Text(FileData, index);
+                        texto = new Text(this,null, index);
                     }
-                    if(ReadUInt(FileData, 16, Int.UInt32).ToString("X2")=="8004")
+                    if (ReadUInt(FileData, 16, Int.UInt32).ToString("X2") == "8004")
                     {
                         type = Types.Textura;
                         textura = new Texture(FileData, index, alfa);
                     }
                 }
+                else
+                {
+                    type = Types.Null;
+                }
+                #endregion
                 //MessageBox.Show("Índice: " + Index.ToString() + "\n" +
                 //    "Posição: " + Position.ToString("X2") + "\n" +
-                //    "Tamanho: " + TrueSIZE.ToString("X2"));
+                //    "Tamanho: " + Size.ToString("X2") + "\n" +
+                //    "Padding: " + Padding.ToString() + "\n" +
+                //    "Tipo: " + type.ToString());
             }
         }
         public class Text
@@ -291,14 +454,25 @@ namespace NUC_Raw_Tools.ArquivoRAW
             public uint SeqCount;
             public List<byte[]> sequences;
             public List<int> seqpointers;
+            private File intfile;
+            private Folder intfold;
 
-            public Text(byte[] file, int index)
+            public Text(File fil, Folder fold, int index)
             {
+                if (fil != null)
+                {
+                    Data = fil.FileData;
+                    intfile = fil;
+                }
+                if (fold != null)
+                {
+                    Data = fold.FileData;
+                    intfold = fold;
+                }
                 sequences = new List<byte[]>();
                 Index = index;
                 Position = 0;
-                Size = (uint)file.Length;
-                Data = Bin.ReadBlock(file, 0, Size);
+                Size = (uint)Data.Length;
                 SeqCount = (uint)ReadUInt(Data, (int)Position, Int.UInt32);
                 int pos = 4;
                 for (int i = 0; i < SeqCount; i++)
@@ -331,6 +505,18 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 Size = (uint)table.Count;
                 Data = new byte[Size];
                 Data = table.ToArray();
+                if (intfile != null)
+                {
+                    intfile.Size = Size;
+                    intfile.FileData = new byte[Size];
+                    intfile.FileData = Data;
+                }
+                if(intfold!=null)
+                {
+                    intfold.Size = Size;
+                    intfold.FileData = new byte[Size];
+                    intfold.FileData = Data;
+                }
                 
             }
             public int AllLength(List<byte[]> data)
@@ -346,11 +532,11 @@ namespace NUC_Raw_Tools.ArquivoRAW
         public class Texture
         {
             public byte[] Data;
-            public int Index;
+            public int Index,errcount=0;
             public uint Position;
             public uint Size;
             public uint Count;
-            public List<Image> images;
+            public List<Image> images,previa;
             public List<TextureDATA.TEXs> TEXs;
             public List<TextureDATA.CLUTs> CLUTs;
 
@@ -358,6 +544,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
             {
                 #region Variáveis
                 images = new List<Image>();
+                previa = new List<Image>();
                 Index = index;
                 Position = 0;
                 int bpp=8;
@@ -442,27 +629,40 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 #region Converter TEX e CLUT para Imagens
                 int i = 0;
                 bool argument=false;
-                int errcount = 0;
+                errcount = 0;
                 foreach(TextureDATA.CLUTs clut in CLUTs) {
                     if (clut.bpp == 8)
                     {
                         byte[] unswizzled = null;
-                        clut.ChangeAlfa(alfa);
+                        clut.ChangeAlfa(255);
                         Color[] colors = Rainbow.ImgLib.Encoding.ColorCodec.CODEC_32BIT_RGBA.DecodeColors(clut.CLUT);
                         colors = unswizzlePalette(colors);
                         try
                         {
                             unswizzled = UnSwizzle8(TEXs[i].width, TEXs[i].height, TEXs[i].TEX);
                             Rainbow.ImgLib.Encoding.ImageDecoderIndexed imageDecoder = new Rainbow.ImgLib.Encoding.ImageDecoderIndexed(unswizzled, TEXs[i].width, TEXs[i].height, Rainbow.ImgLib.Encoding.IndexCodec.FromNumberOfColors(256, Rainbow.ImgLib.Common.ByteOrder.BigEndian), colors);
+                            previa.Add(imageDecoder.DecodeImage());
+
+                        }
+                        catch (ArgumentOutOfRangeException) {  }
+                        unswizzled = null;
+                        clut.ChangeAlfa(alfa);
+                        colors = Rainbow.ImgLib.Encoding.ColorCodec.CODEC_32BIT_RGBA.DecodeColors(clut.CLUT);
+                        colors = unswizzlePalette(colors);
+                        try
+                        {
+                            unswizzled = UnSwizzle8(TEXs[i].width, TEXs[i].height, TEXs[i].TEX);
+                            Rainbow.ImgLib.Encoding.ImageDecoderIndexed imageDecoder = new Rainbow.ImgLib.Encoding.ImageDecoderIndexed(unswizzled, TEXs[i].width, TEXs[i].height, Rainbow.ImgLib.Encoding.IndexCodec.FromNumberOfColors(256, Rainbow.ImgLib.Common.ByteOrder.BigEndian), colors);
                             images.Add(imageDecoder.DecodeImage());
+                            
                         }
                         catch (ArgumentOutOfRangeException) { errcount++; argument = true; }
                     }
                     i++;
                 }
-                if(argument)
-                    MessageBox.Show("Contém "+errcount+" texturas não processadas corretamente!",
-                        "Aviso!",MessageBoxButtons.OK, MessageBoxIcon.Warning); 
+                //if(argument)
+                //    MessageBox.Show("Contém "+errcount+" texturas não processadas corretamente!",
+                //        "Aviso!",MessageBoxButtons.OK, MessageBoxIcon.Warning); 
                 #endregion
             }
 
@@ -683,7 +883,10 @@ namespace NUC_Raw_Tools.ArquivoRAW
             Unknow,
             Cutscene,
             CLT,
-            TEX
+            TEX,
+            Empty,
+            Link,
+            Null
         };
         public static byte[] ReadSequence(byte[] file, int offset, string breaker)
         {
@@ -707,19 +910,23 @@ namespace NUC_Raw_Tools.ArquivoRAW
             ulong retur = 0;
             var memory = new MemoryStream(s);
             var reader = new BinaryReader(memory);
-            reader.BaseStream.Position = offset;
-            switch(type)
+            try
             {
-                case Int.UInt16:
-                    retur = reader.ReadUInt16();
-                    break;
-                case Int.UInt32:
-                    retur = reader.ReadUInt32();
-                    break;
-                case Int.UInt64:
-                    retur = reader.ReadUInt64();
-                    break;
+                reader.BaseStream.Position = offset;
+                switch (type)
+                {
+                    case Int.UInt16:
+                        retur = reader.ReadUInt16();
+                        break;
+                    case Int.UInt32:
+                        retur = reader.ReadUInt32();
+                        break;
+                    case Int.UInt64:
+                        retur = reader.ReadUInt64();
+                        break;
+                }
             }
+            catch (Exception) { }
             reader.Close();
             memory.Close();
             return retur;

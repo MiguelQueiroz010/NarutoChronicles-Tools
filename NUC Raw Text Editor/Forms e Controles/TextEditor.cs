@@ -98,6 +98,7 @@ namespace NUC_Raw_Tools
             nrtb1.RichTextBox.Text = seqs[actual - 1];
             nrtb1.Draw(nrtb1.RichTextBox);
             nrtb2.RichTextBox.Text = seqs[actual - 1];
+            //nrtb2.RichTextBox.MaxLength = nrtb2.RichTextBox.Text.Length;
             filename.Text += p01.treeView1.SelectedNode.Text;
             if (filename.Text.Length > 27)
             {
