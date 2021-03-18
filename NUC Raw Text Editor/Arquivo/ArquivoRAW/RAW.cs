@@ -21,7 +21,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
         public byte[] Data;
         public int folderCount;
         public List<Folder> Pastas;
-        public RAW(byte[] opened, byte alfa)
+        public RAW(byte[] opened)
         {
             #region Abertura e verificar se é pasta
             Data = opened;
@@ -35,7 +35,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
             for (int i = 0; i < folderCount; i++)
             {
                 //if (ReadUInt(Data, 4, Int.UInt32) > 0xf)
-                    Pastas.Add(new Folder(Data, i, alfa));
+                    Pastas.Add(new Folder(Data, i));
             }
             #endregion
             
@@ -50,29 +50,31 @@ namespace NUC_Raw_Tools.ArquivoRAW
             {
                 TreeNode Raiz2 = null;
                 if (folder.type==Types.Texto)
-                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i + " -Texto" + "-" + folder.texto.SeqCount);
+                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i);
                 else if (folder.type == Types.Textura)
-                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i + " -Textura");
+                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i);
                 else if (folder.type==Types.Unknow)
-                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i+ " -Unknow");
+                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i);
                 else if (folder.type == Types.Link)
-                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i + " -Link");
+                    Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i);
                 else
                     Raiz2 = new TreeNode(Path.GetFileName(filename) + "_" + i);
-                try
-                {
+
                     if (folder.filescount != 0)
+                    {
+
+                    if (folder.Arquivos != null)
                     {
                         int j = 0;
                         foreach (var file in folder.Arquivos)
                         {
                             if (file.type == Types.Texto)
-                                Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j + " -Texto" + "-" + file.texto.SeqCount);
+                                Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j);
                             else if (file.type == Types.Textura)
                             {
-                                TreeNode Raiz3 = new TreeNode(Path.GetFileName(filename) + "_" + i + "_" + j + " -Textura");
+                                TreeNode Raiz3 = new TreeNode(Path.GetFileName(filename) + "_" + i + "_" + j);
                                 int y = 0;
-                                foreach(var image in file.textura.images)
+                                foreach (var image in file.textura.images)
                                 {
                                     Raiz3.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j + "_" + y + " -Imagem");
                                     y++;
@@ -81,18 +83,17 @@ namespace NUC_Raw_Tools.ArquivoRAW
 
                             }
                             else if (file.type == Types.Unknow)
-                                Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j + " -Unknow");
+                                Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j);
                             else if (file.type == Types.Link)
-                                Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j + " -Link");
+                                Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j);
                             else if (file.type == Types.Null)
-                                Raiz2.Nodes.Add("Espaço reservado - Vazio"); 
+                                Raiz2.Nodes.Add("Espaço reservado - Vazio");
                             else
                                 Raiz2.Nodes.Add(Path.GetFileName(filename) + "_" + i + "_" + j);
                             j++;
                         }
                     }
-                }
-                catch (NullReferenceException) { }
+                    }
                 Raiz.Nodes.Add(Raiz2);
                 i++;
               
@@ -183,6 +184,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 }
             }
         }
+        
         public void Rebuild(RAW raw, string path, string name)
         {
             #region Ponteiros e Pastas no ROOT
@@ -191,7 +193,10 @@ namespace NUC_Raw_Tools.ArquivoRAW
             foreach (Folder folder in raw.Pastas)
             {
                 int padd = 0;
-                folder.SaveChanges();
+                if (folder.Arquivos !=null)
+                {
+                    folder.SaveChanges();
+                }
                 root.AddRange(BitConverter.GetBytes((UInt32)folder.Index));
                 root.AddRange(BitConverter.GetBytes((UInt32)folder.FileData.Length));
                 root.AddRange(BitConverter.GetBytes((UInt32)offset));
@@ -223,7 +228,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
             public List<File> Arquivos;
             public Texture textura;
             public Types type = Types.Unknow;
-            public Folder(byte[] Data, int index, byte alfa)
+            public Folder(byte[] Data, int index)
             {
                 #region Pasta de arquivos
                 Index = (uint)index;
@@ -246,7 +251,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     if (ReadUInt(FileData, 16, Int.UInt32).ToString("X2") == "8004")
                     {
                         type = Types.Textura;
-                        textura = new Texture(FileData, index, alfa);
+                        textura = new Texture(null,this,FileData, index);
                     }
                     return;
                 }
@@ -254,12 +259,15 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 int soma = 0;
                 if (test < (int)ReadUInt(FileData, 4, Int.UInt32)&&test>0)
                     soma = test + ((int)ReadUInt(FileData, 0, Int.UInt32) * 8);
-                if ((int)ReadUInt(FileData, 4, Int.UInt32)!=0&&test< (int)ReadUInt(FileData, 4, Int.UInt32) && soma == (int)ReadUInt(FileData, 4, Int.UInt32))
+                int ste = filescount * 8+4;
+                while (ste % 0x10 != 0)
+                    ste++;
+                if ((int)ReadUInt(FileData, 4, Int.UInt32)!=0&&test< (int)ReadUInt(FileData, 4, Int.UInt32) && soma == (int)ReadUInt(FileData, 4, Int.UInt32)&& (int)ReadUInt(FileData, 4, Int.UInt32)==ste)
                 {
                     Arquivos = new List<File>();
                     for (int i = 0; i < filescount; i++)
                     {
-                        Arquivos.Add(new File(this, i, alfa));
+                        Arquivos.Add(new File(this, i));
                     }
                     #region Separar LINKS nos arquivos
                     foreach (var file in Arquivos)
@@ -406,7 +414,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
             public byte[] FileData;
             public Text texto;
             public Texture textura;
-            public File(Folder folder, int index,byte alfa)
+            public File(Folder folder, int index)
             {
                 #region Arquivo
                 Index = index;
@@ -430,7 +438,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     if (ReadUInt(FileData, 16, Int.UInt32).ToString("X2") == "8004")
                     {
                         type = Types.Textura;
-                        textura = new Texture(FileData, index, alfa);
+                        textura = new Texture(this,null,FileData, index);
                     }
                 }
                 else
@@ -536,15 +544,16 @@ namespace NUC_Raw_Tools.ArquivoRAW
             public uint Position;
             public uint Size;
             public uint Count;
-            public List<Image> images,previa;
+            public List<Image> images;
             public List<TextureDATA.TEXs> TEXs;
             public List<TextureDATA.CLUTs> CLUTs;
+            private Folder folder;
+            private File filex;
 
-            public Texture(byte[] file, int index, byte alfa)
+            public Texture(File fil, Folder fold,byte[] file, int index)
             {
                 #region Variáveis
                 images = new List<Image>();
-                previa = new List<Image>();
                 Index = index;
                 Position = 0;
                 int bpp=8;
@@ -555,7 +564,16 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 #endregion
                 #region Tamanho, Array e Contagem de texturas
                 Size = (uint)file.Length;
-                Data = Bin.ReadBlock(file, 0, Size);
+                if (fil != null)
+                {
+                    Data = fil.FileData;
+                    filex = fil;
+                }
+                if (fold != null)
+                {
+                    Data = fold.FileData;
+                    folder = fold;
+                }
                 Count = (uint)ReadUInt(Data, 0, Int.UInt32);
                 #endregion
                 #region Offset de tabela de TEX e CLT
@@ -634,21 +652,22 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     if (clut.bpp == 8)
                     {
                         byte[] unswizzled = null;
-                        clut.ChangeAlfa(255);
-                        Color[] colors = Rainbow.ImgLib.Encoding.ColorCodec.CODEC_32BIT_RGBA.DecodeColors(clut.CLUT);
-                        colors = unswizzlePalette(colors);
-                        try
+                        List<Color> pal = new List<Color>();
+                        int pos = 0;
+                        byte r, g, b, a;
+                        while (pos < CLUTs[i].CLUT.Length)
                         {
-                            unswizzled = UnSwizzle8(TEXs[i].width, TEXs[i].height, TEXs[i].TEX);
-                            Rainbow.ImgLib.Encoding.ImageDecoderIndexed imageDecoder = new Rainbow.ImgLib.Encoding.ImageDecoderIndexed(unswizzled, TEXs[i].width, TEXs[i].height, Rainbow.ImgLib.Encoding.IndexCodec.FromNumberOfColors(256, Rainbow.ImgLib.Common.ByteOrder.BigEndian), colors);
-                            previa.Add(imageDecoder.DecodeImage());
-
+                            r = CLUTs[i].CLUT[pos];
+                            g = CLUTs[i].CLUT[pos + 1];
+                            b = CLUTs[i].CLUT[pos + 2];
+                            a = CLUTs[i].CLUT[pos + 3];
+                            if (a <= 128)
+                                a = (byte)((a * 255) / 128);
+                            pal.Add(Color.FromArgb(a, r, g, b));
+                            pos += 4;
                         }
-                        catch (ArgumentOutOfRangeException) {  }
-                        unswizzled = null;
-                        clut.ChangeAlfa(alfa);
-                        colors = Rainbow.ImgLib.Encoding.ColorCodec.CODEC_32BIT_RGBA.DecodeColors(clut.CLUT);
-                        colors = unswizzlePalette(colors);
+                        //clut.ChangeAlfa(255);
+                        Color[] colors = unswizzlePalette(pal.ToArray());
                         try
                         {
                             unswizzled = UnSwizzle8(TEXs[i].width, TEXs[i].height, TEXs[i].TEX);
@@ -665,7 +684,21 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 //        "Aviso!",MessageBoxButtons.OK, MessageBoxIcon.Warning); 
                 #endregion
             }
-
+            public void Save()
+            {
+                if (filex != null)
+                {
+                    filex.Size = Size;
+                    filex.FileData = new byte[Size];
+                    filex.FileData = Data;
+                }
+                if (folder != null)
+                {
+                    folder.Size = Size;
+                    folder.FileData = new byte[Size];
+                    folder.FileData = Data;
+                }
+            }
         }
         public class TextureDATA
         {
@@ -691,22 +724,20 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     CLUT = CLT;
                     bpp = Bpp;
                 }
-                public void ChangeAlfa(byte alfa)
+                public void ChangeAlfa(int alfa)
                 {
                     CLUT = new byte[CL.Length];
-                    for (int i = 0; i < CL.Length; i += 4)
+                    for (int i = 0; i < CL.Length; i += 4) //RGBA
                     {
-                        CLUT[i] = CL[i];
-                        CLUT[i + 1] = CL[i + 1];
-                        CLUT[i + 2] = CL[i + 2];
-                        if (CL[i + 3] == 0x80)
-                            CLUT[i + 3] = alfa;
-                        else
-                            CLUT[i + 3] = CL[i + 3];
+                        CLUT[i] = CL[i]; //R
+                        CLUT[i + 1] = CL[i + 1]; //G
+                        CLUT[i + 2] = CL[i + 2]; //B
+                        CLUT[i + 3] = (byte)(alfa); //Alfa
                     }
                 }
             }
         }
+
         #region Swizzlers/Unswizzlers
         public static byte[] UnSwizzle4(byte[] buffer, int width, int height, int where)
         {

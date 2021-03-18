@@ -11,6 +11,7 @@ using System.Windows.Forms.VisualStyles;
 using System.Diagnostics;
 using NUC_Raw_Tools.ArquivoRAW;
 using System.Drawing.Imaging;
+using System.Windows.Media.Imaging;
 
 namespace NUC_Raw_Tools
 {
@@ -22,7 +23,6 @@ namespace NUC_Raw_Tools
         Point lastPoint;
         OpenFileDialog opened;
         public string rawname, pathf;
-        string[] recentes;
         static readonly string[] suffixes =
 { "Bytes", "KB", "MB", "GB", "TB", "PB" };
         byte[] raw;
@@ -30,10 +30,11 @@ namespace NUC_Raw_Tools
         public Principal()
         {
             InitializeComponent();
+            this.Size = new Size(520, 460);
             CheckRecent();
         }
         #region Elementos Funcionais e Visuais
-        void ShowHide()
+        public void ShowHide()
         {
             abrir.Visible = !abrir.Visible;
             label1.Visible = !label1.Visible;
@@ -42,10 +43,8 @@ namespace NUC_Raw_Tools
             fecharToolStripMenuItem.Enabled = !fecharToolStripMenuItem.Enabled;
             groupBox1.Visible = !groupBox1.Visible;
             treeView1.Visible = !treeView1.Visible;
+            Editar.Visible = !Editar.Visible;
             panel1.Visible=!panel1.Visible;
-            Button[] buttons = { Editar};
-            foreach (var b in buttons)
-                b.Visible = !b.Visible;
             if (groupBox1.Visible)
                 this.BackgroundImage = Properties.Resources.PrincipalBGS;
             else
@@ -58,7 +57,7 @@ namespace NUC_Raw_Tools
                 filename.Text = p1 + "\n" + p2;
             }
         }
-        void CloseFile()
+        public void CloseFile()
         {
             rawfile = null;
             raw = null;
@@ -77,6 +76,8 @@ namespace NUC_Raw_Tools
             exportbt.Visible = false;
             importbt.Visible = false;
             label4.Visible = false;
+            pictureBox1.Visible = false;
+            this.Size = new Size(520, 460);
         }
         #region Design
         private void abrir_Click(object sender, EventArgs e)
@@ -120,6 +121,10 @@ namespace NUC_Raw_Tools
             {
                 groupBox2.Visible = true;
             }
+            else
+            {
+                groupBox2.Visible = false;
+            }
             switch (treeView1.SelectedNode.Level)
             {
                 case 1:
@@ -128,32 +133,42 @@ namespace NUC_Raw_Tools
                     this.Size = new Size(520, 460);
                     if (rawfile.Pastas[treeView1.SelectedNode.Index].type != RAW.Types.Link && rawfile.Pastas[treeView1.SelectedNode.Index].type != RAW.Types.Null)
                     {
-                        if (rawfile.Pastas[treeView1.SelectedNode.Index].type == RAW.Types.Textura)
+                        switch (rawfile.Pastas[treeView1.SelectedNode.Index].type)
                         {
-                            exporttexbt.Visible = true;
+                            case RAW.Types.Textura:
+                                exporttexbt.Visible = true;
+                                label5.Visible = false;
+                                break;
+                            case RAW.Types.Texto:
+                                Editar.Enabled = true;
+                                label5.Visible = true;
+                                label5.Text = "Strings: " + rawfile.Pastas[treeView1.SelectedNode.Index].texto.SeqCount;
+                                break;
+                            default:
+                                exporttexbt.Visible = false;
+                                exportbt.Enabled = true;
+                                Editar.Enabled = false;
+                                label5.Visible = false;
+                                importbt.Enabled = true;
+                                break;
                         }
-                        else
-                        {
-                            exporttexbt.Visible = false;
-                        }
-                        exportbt.Enabled = true;
-                        importbt.Enabled = true;
                     }
                     else
                     {
                         exportbt.Visible = false;
                         importbt.Visible = false;
+                        label5.Visible = false;
                     }
                     importarToolStripMenuItem.Enabled = true;
                     exportarTexturaToolStripMenuItem.Enabled = false;
                     label2.Text = "Tamanho: " + "0x" + rawfile.Pastas[treeView1.SelectedNode.Index].Size.ToString("X2");
                     label3.Text = "Tipo: " + rawfile.Pastas[treeView1.SelectedNode.Index].type.ToString();
-                    #region Verificar se é texto
-                    if (rawfile.Pastas[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
-                        Editar.Enabled = true;
-                    else
-                        Editar.Enabled = false;
-                    #endregion
+                    //#region Verificar se é texto
+                    //if (rawfile.Pastas[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
+                    //    Editar.Enabled = true;
+                    //else
+                    //    Editar.Enabled = false;
+                    //#endregion
                     break;
 
                 case 2:
@@ -163,20 +178,31 @@ namespace NUC_Raw_Tools
                     this.Size = new Size(520, 460);
                     if (rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type != RAW.Types.Link && rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type != RAW.Types.Null)
                     {
-                        if (rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type == RAW.Types.Textura)
+                        switch (rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type)
                         {
-                            exporttexbt.Visible = true;
+                            case RAW.Types.Textura:
+                                label5.Visible = false;
+                                exporttexbt.Visible = true;
+                                break;
+                            case RAW.Types.Texto:
+                                Editar.Enabled = true;
+                                label5.Visible = true;
+                                label5.Text = "Strings: " + rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].texto.SeqCount;
+                                break;
+                            default:
+                                exporttexbt.Visible = false;
+                                exportbt.Visible = true;
+                                Editar.Enabled = false;
+                                label5.Visible = false;
+                                importbt.Visible = true;
+                                break;
                         }
-                        else
-                        {
-                            exporttexbt.Visible = false;
-                        }
-                        exportbt.Visible = true;
-                        importbt.Visible = true;
+                        
                     }
                     else
                     {
                         exportbt.Visible = false;
+                        label5.Visible = false;
                         importbt.Visible = false;
                     }
                     exportarTexturaToolStripMenuItem.Enabled = false;
@@ -197,8 +223,9 @@ namespace NUC_Raw_Tools
                     importbt.Visible = true;
                     exporttexbt.Visible = false;
                     pictureBox1.Visible = true;
+                    label5.Visible = false;
                     this.Size = new Size(882, 460);
-                    pictureBox1.Image = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.previa[treeView1.SelectedNode.Index];
+                    pictureBox1.Image = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.images[treeView1.SelectedNode.Index];
                     break;
 
                 default:
@@ -316,6 +343,7 @@ namespace NUC_Raw_Tools
         private void salvarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             rawfile.Rebuild(rawfile, pathf, rawname);
+            Refresh();
         }
         private void button4_Click(object sender, EventArgs e)
         {
@@ -351,7 +379,7 @@ namespace NUC_Raw_Tools
 
         }
         #endregion
-        string Sizes(int decimal_size)
+        public string Sizes(int decimal_size)
         {
             var sizes = String.Empty;
 
@@ -374,23 +402,22 @@ namespace NUC_Raw_Tools
 
             return sizes;
         }
-        void Abrir(bool isDrag, string fileName)
+        public void Refresh()
         {
-            if (isDrag)
+            if (rawfile.Data != null)
             {
-                #region Se arquivo já aberto
-                if (rawfile != null)
-                    CloseFile();
-                #endregion
+                CloseFile();
+                ShowHide();
+                string path = pathf + @"\" + rawname;
                 #region Arquivo
-                raw = File.ReadAllBytes(fileName);
-                rawfile = new RAW(raw, 128);
+                raw = File.ReadAllBytes(path);
+                rawfile = new RAW(raw);
                 #endregion
                 #region Rótulos
-                rawname = Path.GetFileName(fileName);
-                pathf = Path.GetDirectoryName(fileName);
-                linkLabel1.Text += Path.GetDirectoryName(fileName);
-                filename.Text += Path.GetFileName(fileName);
+                rawname = Path.GetFileName(path);
+                pathf = Path.GetDirectoryName(path);
+                linkLabel1.Text += Path.GetDirectoryName(path);
+                filename.Text += Path.GetFileName(path);
                 size.Text += Sizes(raw.Length);
                 archivescount.Text += rawfile.folderCount;
                 foreach (var file in rawfile.Pastas)
@@ -403,18 +430,70 @@ namespace NUC_Raw_Tools
                             label4.Text = "Erros: " + file.textura.errcount;
                         }
                     }
-                    foreach (var fi in file.Arquivos)
-                    {
-                        if (fi.type == RAW.Types.Textura)
+                    if (file.Arquivos != null)
+                        foreach (var fi in file.Arquivos)
                         {
-                            if (fi.textura.errcount != 0)
+                            if (fi.type == RAW.Types.Textura)
+                            {
+                                if (fi.textura.errcount != 0)
+                                {
+                                    label4.Visible = true;
+                                    label4.Text = "Erros: " + fi.textura.errcount;
+                                }
+                            }
+                        }
+                }
+                #endregion
+                #region Funções
+                AddRecent(pathf + @"\" + rawname);
+                #endregion
+                timerSALVO.Enabled = true;
+                timerSALVO.Start();
+                Salvo.Visible = true;
+            }
+        }
+        public void Abrir(bool isDrag, string fileName)
+        {
+            if (isDrag)
+            {
+                #region Se arquivo já aberto
+                if (rawfile != null)
+                    CloseFile();
+                #endregion
+                #region Arquivo
+                raw = File.ReadAllBytes(fileName);
+                rawfile = new RAW(raw);
+                #endregion
+                #region Rótulos
+                rawname = Path.GetFileName(fileName);
+                pathf = Path.GetDirectoryName(fileName);
+                linkLabel1.Text += Path.GetDirectoryName(fileName);
+                filename.Text += Path.GetFileName(fileName);
+                size.Text += Sizes(raw.Length);
+                archivescount.Text += rawfile.folderCount;
+                foreach (var file in rawfile.Pastas)
+                    {
+                        if (file.type == RAW.Types.Textura)
+                        {
+                            if (file.textura.errcount != 0)
                             {
                                 label4.Visible = true;
-                                label4.Text = "Erros: " + fi.textura.errcount;
+                                label4.Text = "Erros: " + file.textura.errcount;
+                            }
+                        }
+                        if(file.Arquivos!=null)
+                          foreach (var fi in file.Arquivos)
+                        {
+                            if (fi.type == RAW.Types.Textura)
+                            {
+                                if (fi.textura.errcount != 0)
+                                {
+                                    label4.Visible = true;
+                                    label4.Text = "Erros: " + fi.textura.errcount;
+                                }
                             }
                         }
                     }
-                }
                 #endregion
                 #region Funções
                 rawfile.ListInsert(treeView1, rawfile, fileName);
@@ -435,7 +514,7 @@ namespace NUC_Raw_Tools
                     #region Arquivo
                     raw = File.ReadAllBytes(opened.FileName);
 
-                    rawfile = new RAW(raw, 128);
+                    rawfile = new RAW(raw);
                     #endregion
                     #region Rótulos
                     rawname = Path.GetFileName(opened.FileName);
@@ -444,6 +523,29 @@ namespace NUC_Raw_Tools
                     filename.Text += Path.GetFileName(opened.FileName);
                     size.Text += Sizes(raw.Length);
                     archivescount.Text += rawfile.folderCount;
+                    foreach (var file in rawfile.Pastas)
+                    {
+                        if (file.type == RAW.Types.Textura)
+                        {
+                            if (file.textura.errcount != 0)
+                            {
+                                label4.Visible = true;
+                                label4.Text = "Erros: " + file.textura.errcount;
+                            }
+                        }
+                        if (file.Arquivos != null)
+                            foreach (var fi in file.Arquivos)
+                            {
+                                if (fi.type == RAW.Types.Textura)
+                                {
+                                    if (fi.textura.errcount != 0)
+                                    {
+                                        label4.Visible = true;
+                                        label4.Text = "Erros: " + fi.textura.errcount;
+                                    }
+                                }
+                            }
+                    }
                     #endregion
                     #region Funções
                     rawfile.ListInsert(treeView1, rawfile, opened.FileName);
@@ -455,7 +557,7 @@ namespace NUC_Raw_Tools
             }
             
         }
-        void Export(TreeView list, RAW file)
+        public void Export(TreeView list, RAW file)
         {
             var save = new FolderBrowserDialog();
             if (save.ShowDialog() == DialogResult.OK)
@@ -478,7 +580,7 @@ namespace NUC_Raw_Tools
                 }
             }
         }
-        void ExportTexturas(TreeView list, RAW file)
+        public void ExportTexturas(TreeView list, RAW file)
         {
             var save = new FolderBrowserDialog();
             if (save.ShowDialog() == DialogResult.OK)
@@ -497,7 +599,7 @@ namespace NUC_Raw_Tools
                 }
             }
         }
-        void Import(TreeView list, RAW file)
+        public void Import(TreeView list, RAW file)
         {
             var import = new OpenFileDialog();
             import.Filter = "Arquivo RAW|*.raw;*.sraw;*.bin";
@@ -530,6 +632,67 @@ namespace NUC_Raw_Tools
                         break;
                 }
             }
+        }
+        public byte[] ImageToByteArray(System.Drawing.Image imageIn)
+        {
+            using (var ms = new MemoryStream())
+            {
+                imageIn.Save(ms, imageIn.RawFormat);
+                return ms.ToArray();
+            }
+        }
+        void ImportTextura(RAW file)
+        {
+            Image im = Image.FromFile("test.png");
+            byte[] texB = ImageToByteArray(im);
+            Color[] cores = im.Palette.Entries;
+            byte[] cltB = new byte[256];
+            int k = 0;
+            foreach (var cor in cores)
+            {
+                cltB[k] = cor.R;
+                cltB[k + 1] = cor.G;
+                cltB[k + 2] = cor.B;
+                cltB[k + 3] = cor.A;
+                k++;
+            }
+            
+            switch (treeView1.SelectedNode.Level)
+                {
+                    case 3:
+                        
+                            RAW.TextureDATA.TEXs tex = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.TEXs[treeView1.SelectedNode.Index];
+                            RAW.TextureDATA.CLUTs clt = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.CLUTs[treeView1.SelectedNode.Index];
+                            int pos = 0;
+                            while (pos < cltB.Length)
+                            {
+                                if (cltB[pos + 3] <= 255)
+                                {
+                                    cltB[pos + 3] = (byte)((cltB[pos + 3] * 128) / 255);
+                                }
+                                pos += 4;
+                            }
+                            //clut.ChangeAlfa(128);
+                            byte[] textureDATA = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Data;
+                            int[] loc = textureDATA.Locate(tex.TEX);
+                            foreach (var t in loc)
+                            {
+                                Array.Copy(texB, 0, textureDATA, loc[0], texB.Length);
+                            }
+                            //int[] locc = textureDATA.Locate(clt.CLUT);
+                            //foreach (var c in locc)
+                            //{
+                            //    Array.Copy(cltB, 0, textureDATA, locc[0], cltB.Length);
+                            //}
+                            file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Data = new byte[textureDATA.Length];
+                            file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Data = textureDATA;
+                            file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Save();
+                            file.Rebuild(file, pathf,rawname);
+                            Refresh();
+                            MessageBox.Show("Importado!" + "\nLembre-se de salvar!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        break;
+                }
+            
         }
         public void CheckRecent()
         {
@@ -586,12 +749,23 @@ namespace NUC_Raw_Tools
 
         private void importbt_Click(object sender, EventArgs e)
         {
-            Import(treeView1, rawfile);
+            if (treeView1.SelectedNode.Level == 3)
+            {
+                //ImportTextura(rawfile);
+            }
+            else
+                Import(treeView1, rawfile);
         }
 
         private void exporttexbt_Click(object sender, EventArgs e)
         {
             ExportTexturas(treeView1, rawfile);
+        }
+
+        private void timerSALVO_Tick(object sender, EventArgs e)
+        {
+            timerSALVO.Stop();
+            Salvo.Visible = false;
         }
 
         void EditarTexto()
@@ -600,5 +774,49 @@ namespace NUC_Raw_Tools
             editor.ShowDialog();
         }
         #endregion
+    }
+    static class ByteArrayRocks
+    {
+        static readonly int[] Empty = new int[0];
+
+        public static int[] Locate(this byte[] self, byte[] candidate)
+        {
+            if (IsEmptyLocate(self, candidate))
+                return Empty;
+
+            var list = new List<int>();
+
+            for (int i = 0; i < self.Length; i++)
+            {
+                if (!IsMatch(self, i, candidate))
+                    continue;
+
+                list.Add(i);
+            }
+
+            return list.Count == 0 ? Empty : list.ToArray();
+        }
+
+        static bool IsMatch(byte[] array, int position, byte[] candidate)
+        {
+            if (candidate.Length > (array.Length - position))
+                return false;
+
+            for (int i = 0; i < candidate.Length; i++)
+                if (array[position + i] != candidate[i])
+                    return false;
+
+            return true;
+        }
+
+        static bool IsEmptyLocate(byte[] array, byte[] candidate)
+        {
+            return array == null
+                || candidate == null
+                || array.Length == 0
+                || candidate.Length == 0
+                || candidate.Length > array.Length;
+        }
+
     }
 }
