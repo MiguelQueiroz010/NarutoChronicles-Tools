@@ -1,4 +1,6 @@
-﻿namespace NUC_Raw_Tools
+﻿using System.Drawing;
+
+namespace NUC_Raw_Tools
 {
     partial class TextEditor
     {
@@ -35,8 +37,10 @@
             this.button5 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.filename = new System.Windows.Forms.Label();
-            this.nrtb1 = new NUC_Raw_Tools.NRTB(this);
-            this.nrtb2 = new NUC_Raw_Tools.NRTB(this);
+            //this.nrtb1 = new NUC_Raw_Tools.NRTB(this);
+            //this.nrtb2 = new NUC_Raw_Tools.NRTB(this);
+            this.rtb1 = new RichTextBoxEx(this);
+            this.rtb2 = new RichTextBoxEx(this);
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -118,24 +122,40 @@
             // 
             // nrtb1
             // 
-            this.nrtb1.BackColor = System.Drawing.SystemColors.Window;
-            this.nrtb1.RichTextBox.BackColor = System.Drawing.SystemColors.Control;
-            this.nrtb1.Strip.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.nrtb1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.nrtb1.Location = new System.Drawing.Point(14, 46);
-            this.nrtb1.Name = "nrtb1";
-            this.nrtb1.Size = new System.Drawing.Size(395, 89);
-            this.nrtb1.TabIndex = 14;
-            // 
-            // nrtb2
-            // 
-            this.nrtb2.BackColor = System.Drawing.SystemColors.Window;
-            this.nrtb2.Strip.BackColor = System.Drawing.SystemColors.Control;
-            this.nrtb2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.nrtb2.Location = new System.Drawing.Point(14, 152);
-            this.nrtb2.Name = "nrtb2";
-            this.nrtb2.Size = new System.Drawing.Size(395, 89);
-            this.nrtb2.TabIndex = 15;
+            this.rtb1.BackColor = System.Drawing.SystemColors.Window;
+            this.rtb1.BackColor = System.Drawing.SystemColors.Control;
+            //this.nrtb1.Strip.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.rtb1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.rtb1.Location = new System.Drawing.Point(14, 46);
+            this.rtb1.Name = "nrtb1";
+            this.rtb1.Size = new System.Drawing.Size(395, 89);
+            this.rtb1.TabIndex = 14;
+            this.rtb1.NumberColor = Color.Black;
+            this.rtb1.NumberFont = new Font(this.rtb1.Font.FontFamily, 11);
+            this.rtb1.Font = new System.Drawing.Font(this.rtb2.Font.FontFamily, 14);
+            this.rtb1.ShowLineNumbers = true;
+            this.rtb1.VScroll += RichTextBox1_VScroll;
+            //// 
+            //// nrtb2
+            //// 
+            //this.nrtb2.BackColor = System.Drawing.SystemColors.Window;
+            //this.nrtb2.Strip.BackColor = System.Drawing.SystemColors.Control;
+            //this.nrtb2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            //this.nrtb2.Location = new System.Drawing.Point(14, 152);
+            //this.nrtb2.Name = "nrtb2";
+            //this.nrtb2.Size = new System.Drawing.Size(395, 89);
+            //this.nrtb2.TabIndex = 15;
+            this.rtb2.BackColor = System.Drawing.SystemColors.Window;
+            this.rtb2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.rtb2.Location = new System.Drawing.Point(14, 152);
+            this.rtb2.Name = "nrtb2";
+            this.rtb2.NumberFont = new Font(this.rtb1.Font.FontFamily, 11);
+            this.rtb2.Size = new System.Drawing.Size(395, 89);
+            this.rtb2.Font = new System.Drawing.Font(this.rtb2.Font.FontFamily, 14);
+            this.rtb2.TabIndex = 15;
+            this.rtb2.NumberColor = Color.Black;
+            this.rtb2.VScroll += RichTextBox2_VScroll;
+            this.rtb2.ShowLineNumbers = true;
             // 
             // TextEditor
             // 
@@ -143,8 +163,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::NUC_Raw_Tools.Properties.Resources.PrincipalBGS;
             this.ClientSize = new System.Drawing.Size(430, 304);
-            this.Controls.Add(this.nrtb2);
-            this.Controls.Add(this.nrtb1);
+            this.Controls.Add(rtb1);
+            this.Controls.Add(rtb2);
+            //this.Controls.Add(this.nrtb2);
+            //this.Controls.Add(this.nrtb1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
@@ -171,7 +193,8 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label filename;
-        private NRTB nrtb1;
-        private NRTB nrtb2;
+        private RichTextBoxEx rtb1, rtb2;
+        //private NRTB nrtb1;
+        //private NRTB nrtb2;
     }
 }

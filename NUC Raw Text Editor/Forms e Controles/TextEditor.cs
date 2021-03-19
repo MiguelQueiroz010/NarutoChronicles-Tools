@@ -95,9 +95,9 @@ namespace NUC_Raw_Tools
                     }
                     break;
             }
-            nrtb1.RichTextBox.Text = seqs[actual - 1];
-            nrtb1.Draw(nrtb1.RichTextBox);
-            nrtb2.RichTextBox.Text = seqs[actual - 1];
+            rtb1.Text = seqs[actual - 1];
+            rtb1.Draw(rtb1);
+            rtb2.Text = seqs[actual - 1];
             //nrtb2.RichTextBox.MaxLength = nrtb2.RichTextBox.Text.Length;
             filename.Text += p01.treeView1.SelectedNode.Text;
             if (filename.Text.Length > 27)
@@ -126,9 +126,9 @@ namespace NUC_Raw_Tools
             if (actual == seqs.Count-1)
                 button5.Enabled = false;
             actual++;
-            nrtb1.RichTextBox.Text = seqs[actual - 1];
-            nrtb1.Draw(nrtb1.RichTextBox);
-            nrtb2.RichTextBox.Text = seqs[actual-1];
+            rtb2.Text = seqs[actual - 1];
+            rtb2.Draw(rtb2);
+            rtb1.Text = seqs[actual-1];
             label2.Text = "Sequência: "+actual + " de " + seqs.Count;
         }
         private void button4_Click(object sender, EventArgs e)
@@ -139,9 +139,9 @@ namespace NUC_Raw_Tools
             if (actual >= 1)
                 button5.Enabled = true;
             actual--;
-            nrtb1.RichTextBox.Text = seqs[actual - 1];
-            nrtb1.Draw(nrtb1.RichTextBox);
-            nrtb2.RichTextBox.Text = seqs[actual-1];
+            rtb1.Text = seqs[actual - 1];
+            rtb1.Draw(rtb1);
+            rtb2.Text = seqs[actual-1];
             label2.Text = "Sequência: " + actual + " de " + seqs.Count;
         }
 
@@ -154,18 +154,47 @@ namespace NUC_Raw_Tools
             switch (p01.treeView1.SelectedNode.Level)
             {
                 case 1:
-                    p01.rawfile.Pastas[p01.treeView1.SelectedNode.Index].texto.sequences[actual - 1] = Encodings.Naruto.UzumakiChronicles2.GetBytes(nrtb2.RichTextBox.Text);
+                    p01.rawfile.Pastas[p01.treeView1.SelectedNode.Index].texto.sequences[actual - 1] = Encodings.Naruto.UzumakiChronicles2.GetBytes(rtb2.Text);
                     p01.rawfile.Pastas[p01.treeView1.SelectedNode.Index].texto.Save();
 
                     break;
                 case 2:
-                    p01.rawfile.Pastas[p01.treeView1.SelectedNode.Parent.Index].Arquivos[p01.treeView1.SelectedNode.Index].texto.sequences[actual-1] = Encodings.Naruto.UzumakiChronicles2.GetBytes(nrtb2.RichTextBox.Text);
+                    p01.rawfile.Pastas[p01.treeView1.SelectedNode.Parent.Index].Arquivos[p01.treeView1.SelectedNode.Index].texto.sequences[actual-1] = Encodings.Naruto.UzumakiChronicles2.GetBytes(rtb2.Text);
                     p01.rawfile.Pastas[p01.treeView1.SelectedNode.Parent.Index].Arquivos[p01.treeView1.SelectedNode.Index].texto.Save();
                     break;
             }
-            nrtb1.RichTextBox.Text = nrtb2.RichTextBox.Text;
-            nrtb1.Draw(nrtb1.RichTextBox);
+            rtb1.Text = rtb2.Text;
+            rtb1.Draw(rtb1);
         }
+        #region Synchronize ScrollBars code from: https://stackoverflow.com/questions/1827323/c-synchronize-scroll-position-of-two-richtextboxes (Sudhakar MuthuKrishnan)
+        const int WM_USER = 0x400;
+
+        const int EM_GETSCROLLPOS = WM_USER + 221;
+
+        const int EM_SETSCROLLPOS = WM_USER + 222;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern int SendMessage(IntPtr hWnd, int msg, int wParam, ref Point lParam);
+
+        private void RichTextBox1_VScroll(object sender, EventArgs e)
+        {
+            Point pt = new Point();
+
+            SendMessage(rtb2.Handle, EM_GETSCROLLPOS, 0, ref pt);
+
+            SendMessage(rtb1.Handle, EM_SETSCROLLPOS, 0, ref pt);
+        }
+
+
+        private void RichTextBox2_VScroll(object sender, EventArgs e)
+        {
+            Point pt = new Point();
+
+            SendMessage(rtb2.Handle, EM_GETSCROLLPOS, 0, ref pt);
+
+            SendMessage(rtb1.Handle, EM_SETSCROLLPOS, 0, ref pt);
+        }
+        #endregion
         #endregion
     }
 }

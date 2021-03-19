@@ -549,6 +549,12 @@ namespace NUC_Raw_Tools.ArquivoRAW
             public List<TextureDATA.CLUTs> CLUTs;
             private Folder folder;
             private File filex;
+            HashSet<Color> cores;
+            int lastColorCount = -1;
+            int expectedCount = 256;
+            int expectedSizeX;
+            int expectedSizeY;
+            Image currOutput, currInput;
 
             public Texture(File fil, Folder fold,byte[] file, int index)
             {
@@ -620,7 +626,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                         texoffset += (uint)tableoffset;
                         TEX = Bin.ReadBlock(Data, texoffset, size);
                         tableoffset += 16;
-                            TEXs.Add(new TextureDATA.TEXs(TEX, width, height));
+                            TEXs.Add(new TextureDATA.TEXs(TEX, width, height,(int)texoffset));
                             break;
                         case Types.CLT:
                             uint cltoffset = (uint)ReadUInt(Data, (tableoffset + 4), Int.UInt32);
@@ -635,7 +641,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                                 bpp = 4;
                             else if (type == 1024)
                                 bpp = 8;
-                            CLUTs.Add(new TextureDATA.CLUTs(CLT, bpp));
+                            CLUTs.Add(new TextureDATA.CLUTs(CLT, bpp, (int)cltoffset));
                             break;
                         case Types.Unknow:
                             return;
@@ -699,6 +705,88 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     folder.FileData = Data;
                 }
             }
+            public void Importar(int Iindex)
+            {
+                //currInput = currOutput = images[Iindex];
+                //CountColors();
+                //Color[] list = cores.ToArray();
+                //for (int i = 0; i < expectedCount; i++)
+                //{
+                //    if (i < list.Length)
+                //    {
+                //        CLUTs[Iindex].CLUT[i * 4 + 0x10] = list[i].R;
+                //        CLUTs[Iindex].CLUT[i * 4 + 0x11] = list[i].G;
+                //        CLUTs[Iindex].CLUT[i * 4 + 0x12] = list[i].B;
+                //        CLUTs[Iindex].CLUT[i * 4 + 0x13] = list[i].A;
+
+                //    }
+                //    else
+                //    {
+                //        CLUTs[Iindex].CLUT[i * 4 + 0x10] = 0;
+                //        CLUTs[Iindex].CLUT[i * 4 + 0x11] = 0;
+                //        CLUTs[Iindex].CLUT[i * 4 + 0x12] = 0;
+                //        CLUTs[Iindex].CLUT[i * 4 + 0x13] = 0;
+                //    }
+                //}
+                //Bitmap bmp = new Bitmap(currOutput);
+                //int pos = 0;
+                //Color c1, c2;
+                //byte[] tex = UnSwizzle8(TEXs[Iindex].width, TEXs[Iindex].height, TEXs[Iindex].TEX);
+                //if (expectedCount == 16)
+                //    for (int y = 0; y < expectedSizeY; y++)
+                //        for (int x = 0; x < expectedSizeX / 2; x++)
+                //        {
+                //            c1 = bmp.GetPixel(x * 2 + 1, expectedSizeY - y - 1);
+                //            c2 = bmp.GetPixel(x * 2, expectedSizeY - y - 1);
+                //            tex[0x18 + pos++] = (byte)((FindColorIndex(c1, list) << 4) + FindColorIndex(c2, list));
+                //        }
+                //else if (expectedCount == 256)
+                //    for (int y = 0; y < expectedSizeY; y++)
+                //        for (int x = 0; x < expectedSizeX; x++)
+                //        {
+                //            c1 = bmp.GetPixel(x, expectedSizeY - y - 1);
+                //            tex[0x18 + pos++] = FindColorIndex(c1, list);
+                //        }
+                //TEXs[Iindex].TEX = new byte[tex.Length];
+                //TEXs[Iindex].TEX = Swizzle8(TEXs[Iindex].width, TEXs[Iindex].height,tex);
+                //List<byte> palc = new List<byte>();
+                //for(int i =0;i<list.Length;i++)
+                //{
+                //    palc.Add(list[i].R);
+                //    palc.Add(list[i].G);
+                //    palc.Add(list[i].B);
+                //    palc.Add(list[i].A);
+                //}
+                //CLUTs[Iindex].CLUT = palc.ToArray();
+                #region Salvar na DATA
+                Array.Copy(TEXs[Iindex].TEX, 0, Data, TEXs[Iindex].offset, TEXs[Iindex].TEX.Length);//TEX
+                Array.Copy(CLUTs[Iindex].CLUT, 0, Data, CLUTs[Iindex].offset, CLUTs[Iindex].CLUT.Length);//CLT
+                Save();
+                #endregion
+            }
+            private void CountColors()
+            {
+                Bitmap bmp = new Bitmap(currOutput);
+                cores = new HashSet<Color>();
+                for (int y = 0; y < bmp.Size.Height; y++)
+                    for (int x = 0; x < bmp.Size.Width; x++)
+                        cores.Add(bmp.GetPixel(x, y));
+                lastColorCount = cores.Count();
+            }
+            
+            public static byte FindColorIndex(Color v, Color[] pal)
+            {
+
+                byte index = 0;
+                for (byte i = 0; i < pal.Length; i++)
+                    if (pal[i].R == v.R &&
+                        pal[i].G == v.G &&
+                        pal[i].B == v.B &&
+                        pal[i].A == v.A)
+                        return i;
+
+                return index;
+            }
         }
         public class TextureDATA
         {
@@ -707,22 +795,26 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 public byte[] TEX;
                 public int width = 0;
                 public int height = 0;
-                public TEXs(byte[] TEXs, uint Width, uint Height)
+                public int offset;
+                public TEXs(byte[] TEXs, uint Width, uint Height, int Offset)
                 {
                     TEX = TEXs;
                     width = (int)Width;
                     height = (int)Height;
+                    offset = Offset;
                 }
             }
             public class CLUTs
             {
                 public byte[] CLUT,CL;
                 public int bpp;
-                public CLUTs(byte[] CLT,int Bpp)
+                public int offset;
+                public CLUTs(byte[] CLT,int Bpp, int Offset)
                 {
                     CL = CLT;
                     CLUT = CLT;
                     bpp = Bpp;
+                    offset = Offset;
                 }
                 public void ChangeAlfa(int alfa)
                 {

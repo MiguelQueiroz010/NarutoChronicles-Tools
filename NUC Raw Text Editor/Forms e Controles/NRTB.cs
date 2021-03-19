@@ -202,7 +202,7 @@ namespace NUC_Raw_Tools
         }
         private void richTextBox_TextChanged(object sender, EventArgs e)
         {
-            
+            //Draw(this.richTextBox);
             editor.save();
                     
         }

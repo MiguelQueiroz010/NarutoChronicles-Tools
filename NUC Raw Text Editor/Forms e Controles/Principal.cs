@@ -599,6 +599,41 @@ namespace NUC_Raw_Tools
                 }
             }
         }
+        public void ExportTEXCLT(RAW file)
+        {
+            FolderBrowserDialog folder = new FolderBrowserDialog();
+            if(folder.ShowDialog()==DialogResult.OK)
+            {
+                File.WriteAllBytes(folder.SelectedPath + @"\" + treeView1.SelectedNode.Text + ".tex", file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.TEXs[treeView1.SelectedNode.Index].TEX);
+                File.WriteAllBytes(folder.SelectedPath + @"\" + treeView1.SelectedNode.Text + ".clt", file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.CLUTs[treeView1.SelectedNode.Index].CLUT);
+                MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+        public void ImportTEXCLT(RAW file)
+        {
+            byte[] CLT, TEX;
+            OpenFileDialog open = new OpenFileDialog();
+            open.Title = "Abra os dados da textura [TEX]";
+            open.Filter = "TEX DATA|*.tex";
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                TEX = File.ReadAllBytes(open.FileName);
+                open = new OpenFileDialog();
+                open.Title = "Abra os dados da paleta [CLT]";
+                open.Filter = "CLT Paleta|*.clt";
+                if (open.ShowDialog() == DialogResult.OK)
+                {
+                    CLT = File.ReadAllBytes(open.FileName);
+                    int index = treeView1.SelectedNode.Index;
+                    file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.TEXs[index].TEX = TEX;
+                    file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.CLUTs[index].CLUT = CLT;
+                    file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Importar(index);
+                    file.Rebuild(rawfile, pathf, rawname);
+                    Refresh();
+                    MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
         public void Import(TreeView list, RAW file)
         {
             var import = new OpenFileDialog();
@@ -644,49 +679,14 @@ namespace NUC_Raw_Tools
         void ImportTextura(RAW file)
         {
             Image im = Image.FromFile("test.png");
-            byte[] texB = ImageToByteArray(im);
-            Color[] cores = im.Palette.Entries;
-            byte[] cltB = new byte[256];
-            int k = 0;
-            foreach (var cor in cores)
-            {
-                cltB[k] = cor.R;
-                cltB[k + 1] = cor.G;
-                cltB[k + 2] = cor.B;
-                cltB[k + 3] = cor.A;
-                k++;
-            }
             
             switch (treeView1.SelectedNode.Level)
                 {
                     case 3:
-                        
-                            RAW.TextureDATA.TEXs tex = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.TEXs[treeView1.SelectedNode.Index];
-                            RAW.TextureDATA.CLUTs clt = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.CLUTs[treeView1.SelectedNode.Index];
-                            int pos = 0;
-                            while (pos < cltB.Length)
-                            {
-                                if (cltB[pos + 3] <= 255)
-                                {
-                                    cltB[pos + 3] = (byte)((cltB[pos + 3] * 128) / 255);
-                                }
-                                pos += 4;
-                            }
-                            //clut.ChangeAlfa(128);
-                            byte[] textureDATA = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Data;
-                            int[] loc = textureDATA.Locate(tex.TEX);
-                            foreach (var t in loc)
-                            {
-                                Array.Copy(texB, 0, textureDATA, loc[0], texB.Length);
-                            }
-                            //int[] locc = textureDATA.Locate(clt.CLUT);
-                            //foreach (var c in locc)
-                            //{
-                            //    Array.Copy(cltB, 0, textureDATA, locc[0], cltB.Length);
-                            //}
-                            file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Data = new byte[textureDATA.Length];
-                            file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Data = textureDATA;
-                            file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Save();
+
+                    file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.images[treeView1.SelectedNode.Index] = im;
+
+                    file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Importar(treeView1.SelectedNode.Index-1);
                             file.Rebuild(file, pathf,rawname);
                             Refresh();
                             MessageBox.Show("Importado!" + "\nLembre-se de salvar!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -738,19 +738,26 @@ namespace NUC_Raw_Tools
         }
         private void importarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Import(treeView1, rawfile);
+            importbt.PerformClick();
 
         }
 
         private void exportbt_Click(object sender, EventArgs e)
         {
-            Export(treeView1, rawfile);
+            if (treeView1.SelectedNode.Level == 3)
+            {
+                
+                ExportTEXCLT(rawfile);
+            }
+            else
+                Export(treeView1, rawfile);
         }
 
         private void importbt_Click(object sender, EventArgs e)
         {
             if (treeView1.SelectedNode.Level == 3)
             {
+                ImportTEXCLT(rawfile);
                 //ImportTextura(rawfile);
             }
             else
