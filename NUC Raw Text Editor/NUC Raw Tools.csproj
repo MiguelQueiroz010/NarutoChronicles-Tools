@@ -167,7 +167,7 @@
     <Compile Include="Forms e Controles\TextEditor.Designer.cs">
       <DependentUpon>TextEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="RichTextBoxEx.cs">
+    <Compile Include="Forms e Controles\RichTextBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="User32.cs" />
@@ -200,7 +200,6 @@
     <None Include="Resources\giphy.gif" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\njnaruto.ttf" />
     <None Include="Resources\unnamed.jpg" />
   </ItemGroup>
   <ItemGroup>

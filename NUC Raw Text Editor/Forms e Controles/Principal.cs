@@ -226,6 +226,8 @@ namespace NUC_Raw_Tools
                     label5.Visible = false;
                     this.Size = new Size(882, 460);
                     pictureBox1.Image = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.images[treeView1.SelectedNode.Index];
+                    label3.Text = "Tipo: " + rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].type.ToString();
+
                     break;
 
                 default:

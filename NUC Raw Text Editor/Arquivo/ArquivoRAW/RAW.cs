@@ -421,6 +421,11 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 Position = (uint)ReadUInt(folder.FileData, 4 + (8 * (index)) , Int.UInt32);
                 Size = (uint)ReadUInt(folder.FileData, 8 + (8 * (index)), Int.UInt32);
                 FileData = Bin.ReadBlock(folder.FileData, Position, Size);
+                //MessageBox.Show("Índice: " + Index.ToString() + "\n" +
+                //    "Posição: " + Position.ToString("X2") + "\n" +
+                //    "Tamanho: " + Size.ToString("X2") + "\n" +
+                //    "Padding: " + Padding.ToString() + "\n" +
+                //    "Tipo: " + type.ToString());
                 #endregion
                 #region Separar os Tipos
                 if (FileData.Length == 0 && Position != 0)
@@ -435,10 +440,14 @@ namespace NUC_Raw_Tools.ArquivoRAW
                         type = Types.Texto;
                         texto = new Text(this,null, index);
                     }
-                    if (ReadUInt(FileData, 16, Int.UInt32).ToString("X2") == "8004")
+                    if (ReadUInt(FileData, 0x10, Int.UInt32).ToString("X2") == "8004")
                     {
                         type = Types.Textura;
-                        textura = new Texture(this,null,FileData, index);
+                        try
+                        {
+                            textura = new Texture(this, null, FileData, index);
+                        }
+                        catch (Exception) { type = Types.Unknow; }
                     }
                 }
                 else
@@ -446,11 +455,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     type = Types.Null;
                 }
                 #endregion
-                //MessageBox.Show("Índice: " + Index.ToString() + "\n" +
-                //    "Posição: " + Position.ToString("X2") + "\n" +
-                //    "Tamanho: " + Size.ToString("X2") + "\n" +
-                //    "Padding: " + Padding.ToString() + "\n" +
-                //    "Tipo: " + type.ToString());
+                
             }
         }
         public class Text
