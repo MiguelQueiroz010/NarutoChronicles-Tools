@@ -357,7 +357,7 @@ namespace NUC_Raw_Tools
         }
         private void salvarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //rawfile.Rebuild(rawfile, pathf, rawname);
+            rawfile.Rebuild(rawfile, pathf, rawname);
             #region Salvar o arquivo
             System.IO.File.WriteAllBytes(pathf+@"\"+rawname, rawfile.Data);
             #endregion
@@ -374,7 +374,7 @@ namespace NUC_Raw_Tools
             save.FileName = rawname.Substring(0, rawname.Length - 4);
             if(save.ShowDialog()==DialogResult.OK)
             {
-                //rawfile.Rebuild(rawfile,Path.GetDirectoryName(save.FileName), Path.GetFileName(save.FileName));
+                rawfile.Rebuild(rawfile,Path.GetDirectoryName(save.FileName), Path.GetFileName(save.FileName));
                 #region Salvar o arquivo
                 System.IO.File.WriteAllBytes(Path.GetDirectoryName(save.FileName) + @"/" + Path.GetFileName(save.FileName), rawfile.Data);
                 #endregion
