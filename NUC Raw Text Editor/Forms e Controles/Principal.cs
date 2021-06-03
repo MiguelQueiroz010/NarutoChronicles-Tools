@@ -359,7 +359,7 @@ namespace NUC_Raw_Tools
         {
             //rawfile.Rebuild(rawfile, pathf, rawname);
             #region Salvar o arquivo
-            System.IO.File.WriteAllBytes(path + @"/" + rawname, rawfile.Data);
+            System.IO.File.WriteAllBytes(pathf+@"\"+rawname, rawfile.Data);
             #endregion
             Refresh();
         }
