@@ -51,7 +51,7 @@ namespace NUC_Raw_Tools
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaption;
             this.label1.Location = new System.Drawing.Point(0, 1);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(134, 25);
@@ -61,7 +61,7 @@ namespace NUC_Raw_Tools
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.label2.BackColor = System.Drawing.SystemColors.Control;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.Black;
             this.label2.Location = new System.Drawing.Point(10, 277);
@@ -98,7 +98,7 @@ namespace NUC_Raw_Tools
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.panel1.BackColor = System.Drawing.SystemColors.Control;
             this.panel1.Controls.Add(this.filename);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -131,7 +131,7 @@ namespace NUC_Raw_Tools
             this.rtb1.Size = new System.Drawing.Size(395, 89);
             this.rtb1.TabIndex = 14;
             this.rtb1.NumberColor = Color.Black;
-            this.rtb1.NumberFont = new Font(this.rtb1.Font.FontFamily, 11);
+            this.rtb1.NumberFont = new Font(this.rtb1.Font.FontFamily, 8);
             this.rtb1.Font = new System.Drawing.Font(this.rtb2.Font.FontFamily, 14);
             this.rtb1.ShowLineNumbers = true;
             this.rtb1.VScroll += RichTextBox1_VScroll;
@@ -149,7 +149,7 @@ namespace NUC_Raw_Tools
             this.rtb2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.rtb2.Location = new System.Drawing.Point(14, 152);
             this.rtb2.Name = "nrtb2";
-            this.rtb2.NumberFont = new Font(this.rtb1.Font.FontFamily, 11);
+            this.rtb2.NumberFont = new Font(this.rtb1.Font.FontFamily, 8);
             this.rtb2.Size = new System.Drawing.Size(395, 89);
             this.rtb2.Font = new System.Drawing.Font(this.rtb2.Font.FontFamily, 14);
             this.rtb2.TabIndex = 15;

@@ -127,7 +127,7 @@ namespace NUC_Raw_Tools
                 button5.Enabled = false;
             actual++;
             rtb2.Text = seqs[actual - 1];
-            rtb2.Draw(rtb2);
+            rtb1.Draw(rtb1);
             rtb1.Text = seqs[actual-1];
             label2.Text = "Sequência: "+actual + " de " + seqs.Count;
         }
@@ -163,7 +163,7 @@ namespace NUC_Raw_Tools
                     p01.rawfile.Pastas[p01.treeView1.SelectedNode.Parent.Index].Arquivos[p01.treeView1.SelectedNode.Index].texto.Save();
                     break;
             }
-            rtb1.Text = rtb2.Text;
+            //rtb2.Text = rtb1.Text;
             rtb1.Draw(rtb1);
         }
         #region Synchronize ScrollBars code from: https://stackoverflow.com/questions/1827323/c-synchronize-scroll-position-of-two-richtextboxes (Sudhakar MuthuKrishnan)

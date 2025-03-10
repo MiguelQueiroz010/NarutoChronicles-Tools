@@ -124,44 +124,43 @@ namespace NUC_Raw_Tools
         Bitmap bmpCrop;
 
         Bitmap buttons = new Bitmap(Properties.Resources.buttons);
-        string[] simbols = { "%l1", "%r1", "%r2", "%l2", "%2", "%4", "%6", "%8", "%u", "%d", "%le", "%ri", "%pd", "%pl" };
+        string[] simbols = { "/l1", "/r1", "/r2", "/l2", "/2", "/4", "/6", "/8", "/u", "/d", "/le", "/ri", "/pd", "/pl" };
         string[] colors = { "$R", "$O", "$Y", "$G", "$B", "$P" };
         void DrawButtons(int finded, string s, RichTextBox richText)
         {
-
             switch (s)
             {
                 #region Shoulders
-                case "%l1":
+                case "/l1":
                     cloneRect = new Rectangle(0, 0, 24, 16);
                     break;
-                case "%r1":
+                case "/r1":
                     cloneRect = new Rectangle(24, 0, 24, 16);
                     break;
-                case "%r2":
+                case "/r2":
                     cloneRect = new Rectangle(72, 0, 24, 16);
                     break;
-                case "%l2":
+                case "/l2":
                     cloneRect = new Rectangle(48, 0, 24, 16);
                     break;
                 #endregion
                 #region Botões
-                case "%2":
+                case "/2":
                     cloneRect = new Rectangle(48, 16, 16, 16);
                     break;
-                case "%4":
+                case "/4":
                     cloneRect = new Rectangle(32, 16, 16, 16);
                     break;
-                case "%6":
+                case "/6":
                     cloneRect = new Rectangle(16, 16, 16, 16);
                     break;
-                case "%8":
+                case "/8":
                     cloneRect = new Rectangle(0, 16, 16, 16);
                     break;
                     #endregion
             }
             #region Direcionais
-            if (s == "%u")
+            if (s == "/u")
             {
                 cloneRect = new Rectangle(77, 45, 18, 18);
                 bmpCrop = new Bitmap(cloneRect.Width, cloneRect.Height);
@@ -173,7 +172,7 @@ namespace NUC_Raw_Tools
                 this.Paste();
                 return;
             }
-            else if (s == "%d")
+            else if (s == "/d")
             {
                 cloneRect = new Rectangle(77, 45, 18, 18);
                 bmpCrop = new Bitmap(cloneRect.Width, cloneRect.Height);
@@ -186,7 +185,7 @@ namespace NUC_Raw_Tools
                 this.Paste();
                 return;
             }
-            else if (s == "%le")
+            else if (s == "/le")
             {
                 cloneRect = new Rectangle(77, 45, 18, 18);
                 bmpCrop = new Bitmap(cloneRect.Width, cloneRect.Height);
@@ -199,7 +198,7 @@ namespace NUC_Raw_Tools
                 this.Paste();
                 return;
             }
-            else if (s == "%ri")
+            else if (s == "/ri")
             {
                 cloneRect = new Rectangle(77, 45, 18, 18);
                 bmpCrop = new Bitmap(cloneRect.Width, cloneRect.Height);
@@ -211,7 +210,7 @@ namespace NUC_Raw_Tools
                 this.Paste();
                 return;
             }
-            else if (s == "%pd")
+            else if (s == "/pd")
             {
                 cloneRect = new Rectangle(77, 45, 18, 18);
                 bmpCrop = new Bitmap(cloneRect.Width, cloneRect.Height);
@@ -225,7 +224,7 @@ namespace NUC_Raw_Tools
                 this.Paste();
                 return;
             }
-            else if (s == "%pl")
+            else if (s == "/pl")
             {
                 cloneRect = new Rectangle(77, 45, 18, 18);
                 bmpCrop = new Bitmap(cloneRect.Width, cloneRect.Height);
@@ -297,11 +296,12 @@ namespace NUC_Raw_Tools
                 #endregion
             }
         }
+
+        string temp = "";
         private void richTextBox_TextChanged(object sender, EventArgs e)
         {
-            //Draw(this.richTextBox);
             editor.save();
-
+            //Draw(this);
         }
         public static void CopyRegionIntoImage(Bitmap srcBitmap, Rectangle srcRegion, ref Bitmap destBitmap, Rectangle destRegion)
         {
@@ -797,7 +797,7 @@ namespace NUC_Raw_Tools
         {
             int rawSize = Marshal.SizeOf( typeof(User32.POINTL) );
             IntPtr wParam = Marshal.AllocHGlobal( rawSize );
-            int r = User32.SendMessage(this.Handle, (int)User32.Msgs.EM_POSFROMCHAR, (int)wParam, ix);
+            //int r = User32.SendMessage(this.Handle, (int)User32.Msgs.EM_POSFROMCHAR, (int)wParam, ix);
 
             User32.POINTL p1 = (User32.POINTL) Marshal.PtrToStructure(wParam, typeof(User32.POINTL));
 

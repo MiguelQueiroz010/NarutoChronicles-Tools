@@ -1,5 +1,4 @@
-﻿#define UNSWIZZLE_TO_4BIT
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +14,7 @@ using Rainbow.ImgLib;
 using Microsoft.Win32;
 using System.Reflection;
 using System.Xml;
+using System.Windows.Media.Media3D;
 #endregion
 namespace NUC_Raw_Tools.ArquivoRAW
 {
@@ -697,6 +697,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                         size = ponteiros[tc + 1].offset - ponteiros[tc].offset;
 
                     }
+                    //MessageBox.Show(size.ToString("X2"));
                     if (size <= 1024)
                     {
                         ponteiros[tc].tipo = Types.CLT8bpp;
@@ -738,19 +739,61 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 }
                 #endregion
 
+                #region Texture Entries Separar Texturas Linkadas
+                try
+                {
+                    for (int k = 0; k < texentries.Count; k += 4)
+                    {
+                        if (texentries[k].paletteindex == texentries[k + 1].paletteindex &&
+                            texentries[k + 2].paletteindex == texentries[k + 3].paletteindex)
+                        {
+                            texentries[k].linkedwith = new int[] { k+2, k + 3, k,
+                            k + 1};
+                            texentries[k].linkedidx = 3;
+                            texentries[k + 1].linkedidx = 4;
+                            texentries[k + 2].linkedidx = 1;
+                            texentries[k + 3].linkedidx = 2;
+                        }
+
+                    }
+                }
+                catch (Exception) { }
+                #endregion
+
             }
-            public static byte FindColorIndex(Color v, Color[] pal)
+            public byte[] GetPixelData4Bpp(Bitmap image, Color[] palette)
             {
+                int width = image.Width;
+                int height = image.Height;
+                byte[] pixelData = new byte[(width * height) / 2]; // 2 pixels por byte
+                int index = 0;
 
-                byte index = 0;
-                for (byte i = 0; i < pal.Length; i++)
-                    if (pal[i].R == v.R &&
-                        pal[i].G == v.G &&
-                        pal[i].B == v.B &&
-                        pal[i].A == v.A)
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x += 2)
+                    {
+                        Color c1 = image.GetPixel(x, y);
+                        Color c2 = image.GetPixel(x + 1, y);
+
+                        byte index1 = FindColorIndex(c1, palette);
+                        byte index2 = FindColorIndex(c2, palette);
+
+                        pixelData[index++] = (byte)((index1 << 4) | index2); // Armazena dois pixels em um byte
+                    }
+                }
+                return pixelData;
+            }
+
+            private byte FindColorIndex(Color color, Color[] palette)
+            {
+                for (byte i = 0; i < palette.Length; i++)
+                {
+                    if (palette[i].R == color.R && palette[i].G == color.G && palette[i].B == color.B && palette[i].A == color.A)
+                    {
                         return i;
-
-                return index;
+                    }
+                }
+                return 0; // Retorna 0 se não encontrar (fallback)
             }
             byte[] unswizzledPixelData;
             public Image GetImage(int textureindex)
@@ -763,8 +806,6 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 int paletteidx = texentries[textureindex].paletteindex;
                 int width = texentries[textureindex].Width;
                 int height = texentries[textureindex].Height;
-                int dbw = (width / 2 + 0x07) & ~0x07;
-                int dbh = (height / 2 + 0x07) & ~0x07;
                 //MessageBox.Show("índice de textura: " + textureindex.ToString() + "\n" +
                 //   "Pixel Index: "+pixelindex.ToString() + "\n" + "Palette index: " + paletteidx.ToString());
                 while (pos < Entries[paletteidx].Length)
@@ -800,25 +841,11 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 }
                 if (cores.Length <= 16)
                 {
-                    //unswizzledPixelData = PixelDatas[textureindex];
-                    //unswizzledPixelData = new byte[width * height];
-                    //Array.Copy(UnswizzleTexture(Entries[pixelindex], width, height, PixelFormat.Format4bppIndexed), unswizzledPixelData, UnswizzleTexture(Entries[pixelindex], width, height, PixelFormat.Format4bppIndexed).Length);
-                    //cores = pal.ToArray();
-                    //unswizzledPixelData = unswizzlePS2(Entries[pixelindex], width, height / 2);
-                    //MessageBox.Show(PixelDatas[textureindex].Length.ToString("X2"));
-                    //MessageBox.Show((ponteiros[textureindex * 2].Width * ponteiros[textureindex * 2].Height).ToString("X2"));
-                    //InvertEndianess(PixelDatas[textureindex]);
-                    //unswizzledPixelData = UnSwizzle8(texentries[textureindex].Width, texentries[textureindex].Height, Entries[pixelindex]);
-                    //unswizzle4(PixelDatas[textureindex],unswizzledPixelData, ponteiros[textureindex * 2].Width, ponteiros[textureindex * 2].Height);
-                    //unswizzledPixelData = Unswizzle(Entries[pixelindex], 25);
-                    //unswizzledPixelData = From4to8bpp(Entries[pixelindex]);
-                    //unswizzledPixelData = UnSwizzle8(256, 256, unswizzledPixelData);
-                    //Color[] ncor = new Color[256];
-                    //Array.Copy(cores, ncor, cores.Length);
-                    //unswizzledPixelData = P6T_ProcessImg4(texentries[textureindex].Width, texentries[textureindex].Height, Entries[pixelindex]);
-                    //MessageBox.Show(unswizzledPixelData.Length.ToString("X2"));
-                    //unswizzledPixelData = UnSwizzle4(Entries[pixelindex], texentries[textureindex].Width, texentries[textureindex].Height,0);
-                    ImageDecoderIndexed imageDecoder = new ImageDecoderIndexed(Entries[pixelindex], width, height, IndexCodec.FromNumberOfColors(16, Rainbow.ImgLib.Common.ByteOrder.BigEndian), cores);
+                    int add_height = height - 128;
+                    ImageDecoderIndexed imageDecoder = new ImageDecoderIndexed(
+                        UnSwizzle(Entries[pixelindex], width, add_height < 0x80 && add_height > 0 ? height + Math.Abs(add_height):height, 4),
+                        width, height,
+                        IndexCodec.FromNumberOfColors(16, Rainbow.ImgLib.Common.ByteOrder.LittleEndian), cores);
                     image = imageDecoder.DecodeImage();
                     return image;
                 }
@@ -826,45 +853,83 @@ namespace NUC_Raw_Tools.ArquivoRAW
             }
             public void ImportTexture(int index, Image inpt)
             {
-                int pixidx = texentries[index].pixelindex;
-                int paletidx = texentries[index].paletteindex;
-                var k = GetPixelandColorData(inpt);
-                Entries[pixidx] = k[0];
-                Entries[paletidx] = k[1];
-                RebuildData();
+                if (texentries[index].linkedidx != -1)
+                {
+                    List<byte[]> k = null;
+                    int[] links = texentries[index].linkedwith;
+                    var ij = GetPixelandColorData(inpt, true);
+                    int offset = 0;
+
+                    foreach (var link in links)
+                    {
+                        var entry = texentries[link];
+                        int width = entry.Width;
+                        int height = entry.Height;
+                        int size = width * height;
+
+                        Bitmap orig = new Bitmap(inpt);
+                        Bitmap bit = orig.Clone(new Rectangle(0, 0, width, height), PixelFormat.Format8bppIndexed);
+
+                        k = GetPixelandColorData(bit, true);
+                        Entries[entry.pixelindex] = k[0];
+                        Entries[entry.paletteindex] = ij[1];
+
+                        System.IO.File.WriteAllBytes("paleta", Entries[entry.paletteindex]);
+                        offset += size;
+                    }
+                    RebuildData();
+                }
+                else
+                {
+                    int pixidx = texentries[index].pixelindex;
+                    int paletidx = texentries[index].paletteindex;
+                    var k = GetPixelandColorData(inpt, true);
+
+                    Entries[pixidx] = k[0];
+                    Entries[paletidx] = k[1];
+
+                    RebuildData();
+                }
             }
+
             HashSet<Color> colors;
-            Color[] cores; //composta de 4 ou 3 valores, RGBA
+            Color[] cores;
             byte[] coresbyte;
-            public List<byte[]> GetPixelandColorData(Image input)
+
+            public List<byte[]> GetPixelandColorData(Image input, bool swizzle)
             {
                 colors = new HashSet<Color>();
                 coresbyte = null;
                 cores = null;
+
                 var list = new List<byte[]>();
                 Bitmap bit = new Bitmap(input);
-                bit.RotateFlip(RotateFlipType.Rotate180FlipX);
-                int colorcount = 0;
-                #region Obter cores no eixo cartesiano 2D        
+                
+
                 for (int y = 0; y < bit.Height; y++)
-                {
                     for (int x = 0; x < bit.Width; x++)
-                    {
                         colors.Add(bit.GetPixel(x, y));
-                    }
-                }
+
                 cores = new Color[256];
-                //cores = colors.ToArray();
-                Array.Copy(colors.ToArray(), cores, colors.Count);
+                Array.Copy(colors.ToArray(), 0, cores, 0, colors.Count);
                 cores = swizzlePalette(cores);
-                #region Calcular quantia de cores
-                if (cores.Length <= 256)
-                    colorcount = 256;
-                else if (cores.Length <= 16)
-                    colorcount = 16;
-                #endregion
-                #region Separar cores para array
-                coresbyte = new byte[colorcount * 4];//1024 bytes = 256 cores
+
+                if (colors.Count <= 16)
+                {
+                    var newc = new Color[16];
+                    Array.Copy(colors.ToArray(), 0, newc, 0, colors.Count);
+                    newc = swizzlePalette(newc);
+                    
+                    cores = newc.ToArray();
+                }
+                else
+                    bit.RotateFlip(RotateFlipType.Rotate180FlipX);
+
+
+                int colorcount = cores.Length <= 16 ? 16 : 256;
+                coresbyte = new byte[colorcount * 4];
+
+                #region Convert ALPHA value
                 for (int i = 0; i < coresbyte.Length; i += 4)
                 {
                     if ((i / 4) < cores.Length)
@@ -872,30 +937,32 @@ namespace NUC_Raw_Tools.ArquivoRAW
                         coresbyte[i] = cores[i / 4].R;
                         coresbyte[i + 1] = cores[i / 4].G;
                         coresbyte[i + 2] = cores[i / 4].B;
-                        coresbyte[i + 3] = cores[i / 4].A;
-                        if (cores[i / 4].A <= 255)
-                            coresbyte[i + 3] = (byte)((cores[i / 4].A * 128) / 255);
+                        coresbyte[i + 3] = (cores[i / 4].A <= 255) ? (byte)((cores[i / 4].A * 128) / 255) : cores[i / 4].A;
                     }
-
                 }
                 #endregion
-                #endregion
-                #region Obter índices de pixel no eixo cartesiano 2D
-                var pixeldata = new List<byte>();
-                Color c1;
-                for (int y = 0; y < bit.Height; y++)
-                    for (int x = 0; x < bit.Width; x++)
-                    {
-                        c1 = bit.GetPixel(x, bit.Height - y - 1);
-                        pixeldata.Add(FindColorIndex(c1, colors.ToArray()));
-                    }
-                #endregion
-                byte[] swizzledpixdata = Swizzle8(input.Width, input.Height, pixeldata.ToArray());
-                list.Add(swizzledpixdata);
-                list.Add(coresbyte);
-                return list;
 
+                #region Get PixelData
+                var pixeldata = new List<byte>();
+                if (colorcount <= 16)
+                {
+                    pixeldata.AddRange(GetPixelData4Bpp(bit, cores));
+                }
+                else
+                {
+                    for (int y = 0; y < bit.Height; y++)
+                        for (int x = 0; x < bit.Width; x++)
+                            pixeldata.Add(FindColorIndex(bit.GetPixel(x, bit.Height - y - 1), colors.ToArray()));
+                }
+                #endregion
+                System.IO.File.WriteAllBytes("tex4bpp.bin", pixeldata.ToArray());
+                byte[] swizzled = swizzle ? (colorcount == 16 ? Swizzle4bpp(pixeldata.ToArray(), bit.Width, bit.Height) : Swizzle8(input.Width, input.Height, pixeldata.ToArray())) : pixeldata.ToArray();
+                list.Add(swizzled);
+                list.Add(coresbyte);
+                System.IO.File.WriteAllBytes("swizz_tex4bpp.bin", list.ToArray()[0]);
+                return list;
             }
+
             void RebuildData()
             {
                 var data = new List<byte>();
@@ -964,8 +1031,10 @@ namespace NUC_Raw_Tools.ArquivoRAW
         public class TextureEntries
         {
             public int pixelindex, paletteindex; //padded in 0x10 related to the index of this pointer
-            public int Width, Height; //Multiplied for 2
+            public int Width, Height; //Multiplied by 2
             public int Bpp;
+            public int linkedidx = -1;
+            public int[] linkedwith;
             public TextureEntries(byte[] data, List<PointerEntry> entries)
             {
                 pixelindex = (int)Bin.ReadUInt(data, 0, Bin.Int.UInt16);
@@ -975,368 +1044,128 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 Bpp = entries[paletteindex].bpp;
             }
         }
-        public static byte[] From4to8bpp(byte[] input)
+
+        #region Swizzlers/Unswizzlers
+        public static byte[] Swizzle4bpp(byte[] linear, int width, int height)
         {
-            var exit = new List<byte>();
-
-            for (int i = 0; i < input.Length; i++)
-            {
-                int one = (input[i] & 0XF0) >> 4;
-                int two = input[i] & 0xF;
-                exit.Add((byte)one);
-                exit.Add((byte)two);
-            }
-            return exit.ToArray();
-
-        }
-        public static byte[] unswizzle8bpp(byte[] pixels, int w, int h)
-        {
-            byte[] unswizzled = new byte[pixels.Length];
-
-            for (int y = 0; y < h; ++y)
-            {
-                for (int x = 0; x < w; ++x)
-                {
-
-                    int block_location = (y & (~0xf)) * w + (x & (~0xf)) * 2;
-                    int swap_selector = (((y + 2) >> 2) & 0x1) * 4;
-                    int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
-                    int column_location = posY * w * 2 + ((x + swap_selector) & 0x7) * 4;
-
-                    int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2);     // 0,1,2,3
-
-                    int idx = block_location + column_location + byte_num;
-                    if (idx >= pixels.Length)
-                    {
-                        //System.out.println("x");
-                    }
-                    else
-                    {
-                        unswizzled[(y * w) + x] = pixels[idx];
-                    }
-                }
-            }
-
-            return unswizzled;
-        }
-        public static byte[] unswizzlePS2(byte[] bytes, int width, int height)
-        {
-
-            // Make a copy of the swizzled input
-            int dataLength = bytes.Length;
-            byte[] swizzled = new byte[dataLength];
-            Array.Copy(bytes, 0, swizzled, 0, dataLength);
+            byte[] swizzled = new byte[width * height / 2];
 
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int block_location = (y & (~0xf)) * width + (x & (~0xf)) * 2;
-                    int swap_selector = (((y + 2) >> 2) & 0x1) * 4;
-                    int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
-                    int column_location = posY * width * 2 + ((x + swap_selector) & 0x7) * 4;
+                    int index = y * width + x;
 
-                    int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2);     // 0,1,2,3
-
-                    bytes[(y * width) + x] = swizzled[block_location + column_location + byte_num];
-                }
-            }
-
-            return bytes;
-        }
-
-        private static byte[] Unswizzle(byte[] data, int width)
-        {
-            var dst = new byte[data.Length];
-
-            for (var i = 0; i < data.Length; i += 16)
-            {
-                var srcIndex = i;
-                var dstIndex = srcIndex % 0x10;
-                dstIndex += srcIndex / 0x10 % 8 * width;
-                dstIndex += srcIndex / 0x80 % (width / 16) * 16;
-                dstIndex += srcIndex / (width * 8) * width * 8;
-
-                Array.Copy(data, srcIndex, dst, dstIndex, 16);
-            }
-
-            return dst;
-        }
-
-        public static byte[] UnSwizzle(byte[] source, int offset, int width, int height, int bpp)
-        {
-            int destinationOffset = 0;
-
-            // Incorperate the bpp into the width
-            width = (width * bpp) >> 3;
-
-            byte[] destination = new byte[width * height];
-
-            int rowblocks = (width / 16);
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int blockX = x / 16;
-                    int blockY = y / 8;
-
-                    int blockIndex = blockX + ((blockY) * rowblocks);
-                    int blockAddress = blockIndex * 16 * 8;
-
-                    destination[destinationOffset] = source[offset + blockAddress + (x - blockX * 16) + ((y - blockY * 8) * 16)];
-                    destinationOffset++;
-                }
-            }
-
-            return destination;
-        }
-        private static void InvertEndianess(byte[] data)
-        {
-            for (var i = 0; i < data.Length; i++)
-                data[i] = (byte)(((data[i] & 15) << 4) | (data[i] >> 4));
-        }
-        private static int Compact1By1(int x)
-        {
-            x &= 0x55555555;                 // x = -f-e -d-c -b-a -9-8 -7-6 -5-4 -3-2 -1-0
-            x = (x ^ (x >> 1)) & 0x33333333; // x = --fe --dc --ba --98 --76 --54 --32 --10
-            x = (x ^ (x >> 2)) & 0x0f0f0f0f; // x = ---- fedc ---- ba98 ---- 7654 ---- 3210
-            x = (x ^ (x >> 4)) & 0x00ff00ff; // x = ---- ---- fedc ba98 ---- ---- 7654 3210
-            x = (x ^ (x >> 8)) & 0x0000ffff; // x = ---- ---- ---- ---- fedc ba98 7654 3210
-            return x;
-        }
-        public static void unswizzle4(byte[] src, byte[] dst, int width, int height)
-        {
-            int pos = 0;
-            for (int y = 0; y < height; y++)
-            {
-                int yc0 = y * 16;
-                int yc1 = y / 8 * (width * 4 - 128);
-
-                for (int x = 0; x < width / 2; x++)
-                {
-                    int xc0 = x / 16 * 16;
-                    int xc1 = x / 16 * 128;
-                    int pixelPos = x - xc0 + xc1 + yc0 + yc1;
-
-                    dst[pos] = (byte)(src[pixelPos] & 0xF);
-                    pos++;
-                    pixelPos = x - xc0 + xc1 + yc0 + yc1;
-                    dst[pos] = (byte)(src[pixelPos] >> 4);
-                    pos++;
-                }
-
-            }
-        }
-        private static int DecodeMorton2X(int code)
-        {
-            return Compact1By1(code >> 0);
-        }
-
-        private static int DecodeMorton2Y(int code)
-        {
-            return Compact1By1(code >> 1);
-        }
-        public static byte[] UnswizzleTexture(byte[] pixelData, int width, int height, PixelFormat pixelFormat)
-        {
-            int bytesPerPixel = (Bitmap.GetPixelFormatSize(pixelFormat) / 8);
-            byte[] unswizzled = new byte[pixelData.Length];
-
-            for (int i = 0; i < width * height; i++)
-            {
-                int min = width < height ? width : height;
-                int k = (int)Math.Log(min, 2);
-
-                int x, y;
-                if (height < width)
-                {
-                    // XXXyxyxyx → XXXxxxyyy
-                    int j = i >> (2 * k) << (2 * k)
-                        | (DecodeMorton2Y(i) & (min - 1)) << k
-                        | (DecodeMorton2X(i) & (min - 1)) << 0;
-                    x = j / height;
-                    y = j % height;
-                }
-                else
-                {
-                    // YYYyxyxyx → YYYyyyxxx
-                    int j = i >> (2 * k) << (2 * k)
-                        | (DecodeMorton2X(i) & (min - 1)) << k
-                        | (DecodeMorton2Y(i) & (min - 1)) << 0;
-                    x = j % width;
-                    y = j / width;
-                }
-
-                if (y >= height || x >= width) continue;
-
-                Buffer.BlockCopy(pixelData, i * bytesPerPixel, unswizzled, ((y * width) + x) * bytesPerPixel, bytesPerPixel);
-            }
-
-            return unswizzled;
-        }
-        public static byte[] UnSwizzle(byte[] data, int width, int height, int blockSize)
-        {
-            var unswizzled = new byte[data.Length];
-            var dataIndex = 0;
-            int heightTexels = height / 4;
-            int widthTexels = width / 4;
-            var texelCount = widthTexels * heightTexels;
-
-            for (int texel = 0; texel < texelCount; ++texel)
-            {
-                int pixelIndex = SwizzleUtilities.Morton(texel, widthTexels, heightTexels);
-                int destIndex = blockSize * pixelIndex;
-                Array.Copy(data, dataIndex, unswizzled, destIndex, blockSize);
-                dataIndex += blockSize;
-            }
-
-            return unswizzled;
-        }
-        public static byte[] P6T_ProcessImg4(int w, int h, byte[] inpixels)
-        {
-            byte[] outpixels = new byte[w * h];
-            byte entry;
-            //FILE *bindump;
-            for (int y = 0; y < h; y++)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    // get the pen
-                    int index = (y * w) + x;
-
-
-                    // swizzle
+                    // Swizzle calculations (reverse of UnSwizzle)
                     int pageX = x & (~0x7f);
                     int pageY = y & (~0x7f);
 
-                    int pages_horz = (w + 127) / 128;
-                    int pages_vert = (h + 127) / 128;
+                    int pages_horz = (width + 127) / 128;
+                    int pages_vert = (height + 127) / 128;
+                    int page_number = (pageY / 128) * pages_horz + (pageX / 128);
+
+                    int page32Y = (page_number / pages_vert) * 32;
+                    int page32X = (page_number % pages_vert) * 64;
+                    int page_location = page32Y * height * 2 + page32X * 4;
+
+                    int locX = x & 0x7f;
+                    int locY = y & 0x7f;
+
+                    int block_location = ((locX & (~0x1f)) >> 1) * height + (locY & (~0xf)) * 2;
+                    int swap_selector = (((y + 2) >> 2) & 0x1) * 4;
+                    int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
+
+                    int column_location = posY * height * 2 + ((x + swap_selector) & 0x7) * 4;
+                    int byte_num = (x >> 3) & 3;
+                    int bits_set = (y >> 1) & 1;
+                    int pos = page_location + block_location + column_location + byte_num;
+
+                    byte pix = linear[index >> 1];
+                    int uPen;
+
+                    if ((index & 1) != 0)
+                        uPen = (pix >> 4) & 0xF;
+                    else
+                        uPen = pix & 0xF;
+
+                    if ((bits_set & 1) != 0)
+                        swizzled[pos] = (byte)((swizzled[pos] & 0x0F) | ((uPen & 0xF) << 4));
+                    else
+                        swizzled[pos] = (byte)((swizzled[pos] & 0xF0) | (uPen & 0xF));
+                }
+            }
+
+            return swizzled;
+        }
+        public static byte[] UnSwizzle(byte[] pixel, int width, int height, int bpp)
+        {
+            byte[] pSwizTexels = new byte[width * height / 2];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int index = y * width + x;
+
+                    // unswizzle
+                    int pageX = x & (~0x7f);
+                    int pageY = y & (~0x7f);
+
+                    int pages_horz = (width + 127) / 128;
+                    int pages_vert = (height + 127) / 128;
 
                     int page_number = (pageY / 128) * pages_horz + (pageX / 128);
 
                     int page32Y = (page_number / pages_vert) * 32;
                     int page32X = (page_number % pages_vert) * 64;
 
-                    int page_location = page32Y * h * 2 + page32X * 4;
+                    int page_location = page32Y * height * 2 + page32X * 4;
 
                     int locX = x & 0x7f;
                     int locY = y & 0x7f;
 
-                    int block_location = ((locX & (~0x1f)) >> 1) * h + (locY & (~0xf)) * 2;
+                    int block_location = ((locX & (~0x1f)) >> 1) * height + (locY & (~0xf)) * 2;
                     int swap_selector = (((y + 2) >> 2) & 0x1) * 4;
                     int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
 
-                    int column_location = posY * h * 2 + ((x + swap_selector) & 0x7) * 4;
+                    int column_location = posY * height * 2 + ((x + swap_selector) & 0x7) * 4;
 
                     int byte_num = (x >> 3) & 3;     // 0,1,2,3
+                    int bits_set = (y >> 1) & 1;     // 0,1 (lower/upper 4 bits)
+                    int pos = page_location + block_location + column_location + byte_num;
 
-                    entry = inpixels[page_location + block_location + column_location + byte_num];
-                    entry = (byte)((entry >> ((y >> 1) & 0x01) * 4) & 0x0F);
-                    outpixels[index] = entry;
-
+                    // get the pen
+                    if ((bits_set & 1) != 0)
+                    {
+                        int uPen = (pixel[pos] >> 4) & 0xf;
+                        byte pix = pSwizTexels[index >> 1];
+                        if ((index & 1) != 0)
+                        {
+                            pSwizTexels[index >> 1] = (byte)(((uPen << 4) & 0xf0) | (pix & 0xf));
+                        }
+                        else
+                        {
+                            pSwizTexels[index >> 1] = (byte)((pix & 0xf0) | (uPen & 0xf));
+                        }
+                    }
+                    else
+                    {
+                        int uPen = pixel[pos] & 0xf;
+                        byte pix = pSwizTexels[index >> 1];
+                        if ((index & 1) != 0)
+                        {
+                            pSwizTexels[index >> 1] = (byte)(((uPen << 4) & 0xf0) | (pix & 0xf));
+                        }
+                        else
+                        {
+                            pSwizTexels[index >> 1] = (byte)((pix & 0xf0) | (uPen & 0xf));
+                        }
+                    }
                 }
             }
-            return outpixels;
+            return pSwizTexels;
+
         }
-        //public void ChangeAlfa(int alfa)
-        //{
-        //    CLUT = new byte[CL.Length];
-        //    for (int i = 0; i < CL.Length; i += 4) //RGBA
-        //    {
-        //        CLUT[i] = CL[i]; //R
-        //        CLUT[i + 1] = CL[i + 1]; //G
-        //        CLUT[i + 2] = CL[i + 2]; //B
-        //        CLUT[i + 3] = (byte)(alfa); //Alfa
-        //    }
-        //}
-        #region Swizzlers/Unswizzlers
-        public static byte[] UnSwizzle4(byte[] buffer, int width, int height, int where)
-        {
-            // HUGE THANKS TO:
-            // L33TMasterJacob for finding the information on unswizzling 4-bit textures
-            // Dageron for his 4-bit unswizzling code; he's truly a genius!
-            //
-            // Source: https://gta.nick7.com/ps2/swizzling/unswizzle_delphi.txt
 
-            byte[] InterlaceMatrix = {
-        0x00, 0x10, 0x02, 0x12,
-        0x11, 0x01, 0x13, 0x03,
-    };
-
-            int[] Matrix = { 0, 1, -1, 0 };
-            int[] TileMatrix = { 4, -4 };
-
-            var pixels = new byte[width * height];
-            var newPixels = new byte[width * height];
-
-            var d = 0;
-            var s = where;
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < (width >> 1); x++)
-                {
-                    var p = buffer[s++];
-
-                    pixels[d++] = (byte)(p & 0xF);
-                    pixels[d++] = (byte)(p >> 4);
-                }
-            }
-
-            // not sure what this was for, but it actually causes issues
-            // we can just use width directly without issues!
-            //var mw = width;
-
-            //if ((mw % 32) > 0)
-            //    mw = ((mw / 32) * 32) + 32;
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    var oddRow = ((y & 1) != 0);
-
-                    var num1 = (byte)((y / 4) & 1);
-                    var num2 = (byte)((x / 4) & 1);
-                    var num3 = (y % 4);
-
-                    var num4 = ((x / 4) % 4);
-
-                    if (oddRow)
-                        num4 += 4;
-
-                    var num5 = ((x * 4) % 16);
-                    var num6 = ((x / 16) * 32);
-
-                    var num7 = (oddRow) ? ((y - 1) * width) : (y * width);
-
-                    var xx = x + num1 * TileMatrix[num2];
-                    var yy = y + Matrix[num3];
-
-                    var i = InterlaceMatrix[num4] + num5 + num6 + num7;
-                    var j = yy * width + xx;
-
-                    newPixels[j] = pixels[i];
-                }
-            }
-
-#if UNSWIZZLE_TO_4BIT
-            var result = new byte[width * height];
-
-            s = 0;
-            d = 0;
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < (width >> 1); x++)
-                    result[d++] = (byte)((newPixels[s++] & 0xF) | (newPixels[s++] << 4));
-            }
-            return result;
-#else
-            // return an 8-bit texture
-            return newPixels;
-#endif
-        }
         #region Code from: https://github.com/TGEnigma/DDS3-Model-Studio/blob/d96e6b3e7821f0d527105641be6e300521291e6f/Source/DDS3ModelLibrary/PS2/GS/GSPixelFormatHelper.cs
         public static byte[] UnSwizzle8(int width, int height, byte[] paletteIndices)
         {
@@ -1502,38 +1331,5 @@ namespace NUC_Raw_Tools.ArquivoRAW
             return retur;
         }
 
-    }
-    internal static class SwizzleUtilities
-    {
-        public static int Morton(int t, int sx, int sy)
-        {
-            int num1;
-            int num2 = num1 = 1;
-            int num3 = t;
-            int num4 = sx;
-            int num5 = sy;
-            int num6 = 0;
-            int num7 = 0;
-
-            while (num4 > 1 || num5 > 1)
-            {
-                if (num4 > 1)
-                {
-                    num6 += num2 * (num3 & 1);
-                    num3 >>= 1;
-                    num2 *= 2;
-                    num4 >>= 1;
-                }
-                if (num5 > 1)
-                {
-                    num7 += num1 * (num3 & 1);
-                    num3 >>= 1;
-                    num1 *= 2;
-                    num5 >>= 1;
-                }
-            }
-
-            return num7 * sx + num6;
-        }
     }
 }

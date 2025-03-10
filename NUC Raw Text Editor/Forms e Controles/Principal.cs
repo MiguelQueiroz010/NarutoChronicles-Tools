@@ -12,6 +12,7 @@ using System.Diagnostics;
 using NUC_Raw_Tools.ArquivoRAW;
 using System.Drawing.Imaging;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.TextFormatting;
 
 namespace NUC_Raw_Tools
 {
@@ -237,9 +238,11 @@ namespace NUC_Raw_Tools
                     label5.Visible = false;
                     label6.Visible = true;
                     this.Size = new Size(882, 460);
+                    var tex = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index];
                     pictureBox1.Image = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.GetImage(treeView1.SelectedNode.Index);
                     label3.Text = "Tipo: " + rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].type.ToString();
-                    label6.Text = "Resolução: " + pictureBox1.Image.Width + "x" + pictureBox1.Image.Height+" "+ rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].Bpp+" Bpp "+ rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Entries[rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].paletteindex].Length/4+" cores";
+                    label6.Text = "Resolução: " + pictureBox1.Image.Width + "x" + pictureBox1.Image.Height + " " + rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].Bpp + " Bpp " + rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Entries[rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].paletteindex].Length / 4 + " cores\nÍndice textura linkada: " +
+                        rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].linkedidx;
                     break;
 
                 default:
@@ -634,7 +637,8 @@ namespace NUC_Raw_Tools
                         MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         break;
                     case 3:
-                        rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.GetImage(treeView1.SelectedNode.Index).Save(save.SelectedPath+"/" + treeView1.SelectedNode.Text + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                        var tex = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.GetImage(treeView1.SelectedNode.Index);
+                        tex.Save(save.SelectedPath+"/" + treeView1.SelectedNode.Text + ".png", System.Drawing.Imaging.ImageFormat.Png);
                         MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         break;
                 }
@@ -741,60 +745,118 @@ namespace NUC_Raw_Tools
                 }
             }
         }
-        void ImportTextura(RAW file)
+        public void ImportTextura(RAW file)
         {
-            switch (treeView1.SelectedNode.Level)
+            if (treeView1.SelectedNode.Level != 3)
+                return;
+
+            OpenFileDialog ofd = new OpenFileDialog
             {
-                case 3:
-                    if (file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].Bpp == 4)
-                    {
-                        MessageBox.Show("Atualmente suporto apenas texturas 8bpp!!", "Erro");
-                        return;
-                    }
-                    OpenFileDialog ofd = new OpenFileDialog();
-                    ofd.Filter = "Portable Network Graphics(*.png)|*.png";
-                    if (ofd.ShowDialog() == DialogResult.OK)
-                    {
-                        if (Path.GetExtension(ofd.FileName).ToLower() != ".png")
-                        {
-                            MessageBox.Show("Formato de Imagem não suportado!!");
-                            return;
-                        }
-                        Image input = Image.FromFile(ofd.FileName);
-                        Bitmap bit = new Bitmap(input);
-                        HashSet<Color> colors = new HashSet<Color>();
-                        for (int y = 0; y < bit.Height; y++)
-                        {
-                            for (int x = 0; x < bit.Width; x++)
-                            {
-                                colors.Add(bit.GetPixel(x, y));
-                            }
-                        }
-                        Color[] cores = colors.ToArray();
-                        int colorcoutn = cores.Length;
-                        int bpp = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].Bpp;
-                        int width = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].Width;
-                        int height = file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].Height;
-                        if (input.Width == width && input.Height == height &&bpp==8&&colorcoutn<=256)
-                        {
-                            file.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.ImportTexture(treeView1.SelectedNode.Index, input);
-                            MessageBox.Show("Importado!" + "\nLembre-se de salvar!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            var node = treeView1.SelectedNode;
-                            treeView1.SelectedNode = node;
-                            treeView1.Focus();
-                            treeView1.Select();
-                            pictureBox1.Visible = true;
-                            label5.Visible = false;
-                            this.Size = new Size(882, 460);
-                            pictureBox1.Image = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.GetImage(treeView1.SelectedNode.Index);
-                        }
-                        else
-                          MessageBox.Show("A imagem deve ter a mesma resolução da original\n[e atualmente suporto apenas texturas 8bpp]!!\n\nResolução esperada: " + width + "x" + height+"\n"+bpp.ToString()+" bpp 256 cores\n\nQuantia de cores da textura tentada: "+ colorcoutn+" cores\nRecomendo usar o OptiPix ImageStudio para reduzir as cores!!", "Erro");
-                        
-                    }
-                    break;
+                Filter = "Portable Network Graphics(*.png)|*.png"
+            };
+
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (Path.GetExtension(ofd.FileName).ToLower() != ".png")
+            {
+                MessageBox.Show("Formato de Imagem não suportado!!");
+                return;
             }
 
+            Image input = Image.FromFile(ofd.FileName);
+            Bitmap bitmap = new Bitmap(input);
+
+            HashSet<Color> colors = new HashSet<Color>();
+            for (int y = 0; y < bitmap.Height; y++)
+            {
+                for (int x = 0; x < bitmap.Width; x++)
+                {
+                    colors.Add(bitmap.GetPixel(x, y));
+                }
+            }
+
+            Color[] colorArray = colors.ToArray();
+            int colorCount = colorArray.Length;
+
+            var selectedNode = treeView1.SelectedNode;
+            var parentNode = selectedNode.Parent;
+            var grandParentNode = parentNode.Parent;
+
+            var pasta = file.Pastas[grandParentNode.Index];
+            var arquivo = pasta.Arquivos[parentNode.Index];
+            var textura = arquivo.textura;
+            var texEntry = textura.texentries[selectedNode.Index];
+
+            int width = texEntry.Width;
+            int height = texEntry.Height;
+            int bpp = texEntry.Bpp;
+
+            bool isLinked = texEntry.linkedidx != -1;
+            bool isValidSize = input.Width == width && input.Height == height;
+            bool isValidColorCount = colorCount <= 256;
+
+            if (!isLinked && isValidSize && isValidColorCount)
+            {
+                textura.ImportTexture(selectedNode.Index, input);
+                ShowSuccessMessage();
+                return;
+            }
+
+            if (isLinked)
+            {
+                (width, height) = CalculateLinkedTextureSize(textura, texEntry);
+                if (input.Width == width && input.Height == height && bpp == 8 && isValidColorCount)
+                {
+                    textura.ImportTexture(selectedNode.Index, input);
+                    ShowSuccessMessage();
+                }
+                else
+                {
+                    ShowErrorMessage(width, height, bpp, colorCount);
+                }
+                return;
+            }
+
+            ShowErrorMessage(width, height, bpp, colorCount);
+        }
+
+        public void ShowSuccessMessage()
+        {
+            MessageBox.Show("Importado!\nLembre-se de salvar!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            RefreshUI();
+        }
+
+        public void ShowErrorMessage(int width, int height, int bpp, int colorCount)
+        {
+            MessageBox.Show($"A imagem deve ter a mesma resolução da original\n[e atualmente suporto apenas texturas 8bpp]!!\n\n" +
+                            $"Resolução esperada: {width}x{height}\n" +
+                            $"{bpp} bpp 256 cores\n\n" +
+                            $"Quantia de cores da textura tentada: {colorCount} cores\n" +
+                            "Recomendo usar o OptiPix ImageStudio para reduzir as cores!!", "Erro");
+        }
+
+        public void RefreshUI()
+        {
+            var node = treeView1.SelectedNode;
+            treeView1.SelectedNode = node;
+            treeView1.Focus();
+            treeView1.Select();
+            pictureBox1.Visible = true;
+            label5.Visible = false;
+            this.Size = new Size(882, 460);
+        }
+
+        public (int, int) CalculateLinkedTextureSize(RAW.TextureArray textura, RAW.TextureEntries texEntry)
+        {
+            int width = 0, height = 0;
+            foreach (int idx in texEntry.linkedwith)
+            {
+                var entry = textura.texentries[idx];
+                width += entry.Width;
+                height += entry.Height;
+            }
+            return (width / 2, height / 2);
         }
         void ImportTXT(string input,RAW.Text texto)
         {
@@ -887,6 +949,7 @@ namespace NUC_Raw_Tools
             timerSALVO.Stop();
             Salvo.Visible = false;
         }
+
 
         void EditarTexto()
         {

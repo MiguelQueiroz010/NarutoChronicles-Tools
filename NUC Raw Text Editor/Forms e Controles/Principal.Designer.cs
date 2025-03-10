@@ -49,6 +49,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -67,7 +68,6 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.Salvo = new System.Windows.Forms.Label();
             this.timerSALVO = new System.Windows.Forms.Timer(this.components);
-            this.label6 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -177,7 +177,7 @@
             // 
             this.exportarToolStripMenuItem.Enabled = false;
             this.exportarToolStripMenuItem.Name = "exportarToolStripMenuItem";
-            this.exportarToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.exportarToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             this.exportarToolStripMenuItem.Text = "Exportar RAW";
             this.exportarToolStripMenuItem.Click += new System.EventHandler(this.exportarToolStripMenuItem_Click);
             // 
@@ -185,7 +185,7 @@
             // 
             this.exportarTexturaToolStripMenuItem.Enabled = false;
             this.exportarTexturaToolStripMenuItem.Name = "exportarTexturaToolStripMenuItem";
-            this.exportarTexturaToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.exportarTexturaToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             this.exportarTexturaToolStripMenuItem.Text = "Exportar Textura";
             this.exportarTexturaToolStripMenuItem.Click += new System.EventHandler(this.exportarTexturaToolStripMenuItem_Click);
             // 
@@ -193,7 +193,7 @@
             // 
             this.importarToolStripMenuItem.Enabled = false;
             this.importarToolStripMenuItem.Name = "importarToolStripMenuItem";
-            this.importarToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.importarToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             this.importarToolStripMenuItem.Text = "Importar RAW";
             this.importarToolStripMenuItem.Click += new System.EventHandler(this.importarToolStripMenuItem_Click);
             // 
@@ -201,7 +201,7 @@
             // 
             this.importarTexturaToolStripMenuItem.Enabled = false;
             this.importarTexturaToolStripMenuItem.Name = "importarTexturaToolStripMenuItem";
-            this.importarTexturaToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.importarTexturaToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             this.importarTexturaToolStripMenuItem.Text = "Importar Textura";
             this.importarTexturaToolStripMenuItem.Click += new System.EventHandler(this.importarTexturaToolStripMenuItem_Click);
             // 
@@ -216,7 +216,7 @@
             // 
             this.Editar.Enabled = false;
             this.Editar.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.Editar.Font = new System.Drawing.Font("Pixel Operator HB", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Editar.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Editar.Location = new System.Drawing.Point(368, 10);
             this.Editar.Name = "Editar";
             this.Editar.Size = new System.Drawing.Size(94, 38);
@@ -272,6 +272,18 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Selecionado";
             this.groupBox2.Visible = false;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.BackColor = System.Drawing.Color.White;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.ForeColor = System.Drawing.Color.Green;
+            this.label6.Location = new System.Drawing.Point(6, 44);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(71, 13);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "Resolução:";
             // 
             // label5
             // 
@@ -402,7 +414,7 @@
             // importbt
             // 
             this.importbt.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.importbt.Font = new System.Drawing.Font("Pixel Operator HB", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.importbt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.importbt.Location = new System.Drawing.Point(12, 10);
             this.importbt.Name = "importbt";
             this.importbt.Size = new System.Drawing.Size(94, 38);
@@ -415,7 +427,7 @@
             // exportbt
             // 
             this.exportbt.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.exportbt.Font = new System.Drawing.Font("Pixel Operator HB", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exportbt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.exportbt.Location = new System.Drawing.Point(112, 10);
             this.exportbt.Name = "exportbt";
             this.exportbt.Size = new System.Drawing.Size(94, 38);
@@ -428,7 +440,7 @@
             // exporttexbt
             // 
             this.exporttexbt.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.exporttexbt.Font = new System.Drawing.Font("Pixel Operator HB", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exporttexbt.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.exporttexbt.Location = new System.Drawing.Point(225, 10);
             this.exporttexbt.Name = "exporttexbt";
             this.exporttexbt.Size = new System.Drawing.Size(137, 38);
@@ -478,18 +490,6 @@
             // 
             this.timerSALVO.Interval = 850;
             this.timerSALVO.Tick += new System.EventHandler(this.timerSALVO_Tick);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.BackColor = System.Drawing.Color.White;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.ForeColor = System.Drawing.Color.Green;
-            this.label6.Location = new System.Drawing.Point(6, 44);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 13);
-            this.label6.TabIndex = 8;
-            this.label6.Text = "Resolução:";
             // 
             // Principal
             // 

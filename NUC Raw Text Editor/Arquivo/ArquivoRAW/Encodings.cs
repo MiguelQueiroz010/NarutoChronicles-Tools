@@ -41,7 +41,7 @@ namespace NUC_Raw_Tools
                         foreach (var w in llv.words)
                         {
                             
-                                if (s[i].ToString() == w&&s[i].ToString()!="%")
+                                if (s[i].ToString() == w&&s[i].ToString()!= "/")
                                 {
                                     byte[] str = BitConverter.GetBytes(Convert.ToInt16(llv.vals[j], 16));
                                     Array.Reverse(str);
