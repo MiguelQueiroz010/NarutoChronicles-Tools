@@ -47,14 +47,12 @@
             this.sobreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Editar = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.path = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.archivescount = new System.Windows.Forms.Label();
             this.size = new System.Windows.Forms.Label();
             this.filename = new System.Windows.Forms.Label();
@@ -65,14 +63,24 @@
             this.exportbt = new System.Windows.Forms.Button();
             this.exporttexbt = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.Salvo = new System.Windows.Forms.Label();
             this.timerSALVO = new System.Windows.Forms.Timer(this.components);
+            this.layout = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.layout.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
+            this.panel2.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -88,11 +96,9 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.menuStrip1.Size = new System.Drawing.Size(501, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(874, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
-            this.menuStrip1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Principal_MouseDown);
-            this.menuStrip1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Principal_MouseMove);
             // 
             // arquivoToolStripMenuItem
             // 
@@ -207,7 +213,10 @@
             // 
             // sobreToolStripMenuItem
             // 
+            this.sobreToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.sobreToolStripMenuItem.Name = "sobreToolStripMenuItem";
+            this.sobreToolStripMenuItem.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.sobreToolStripMenuItem.ShowShortcutKeys = false;
             this.sobreToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
             this.sobreToolStripMenuItem.Text = "Sobre";
             this.sobreToolStripMenuItem.Click += new System.EventHandler(this.sobreToolStripMenuItem_Click);
@@ -217,85 +226,34 @@
             this.Editar.Enabled = false;
             this.Editar.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.Editar.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Editar.Location = new System.Drawing.Point(368, 10);
+            this.Editar.Location = new System.Drawing.Point(343, 3);
             this.Editar.Name = "Editar";
-            this.Editar.Size = new System.Drawing.Size(94, 38);
+            this.Editar.Size = new System.Drawing.Size(65, 23);
             this.Editar.TabIndex = 4;
             this.Editar.Text = "Editar";
             this.Editar.UseVisualStyleBackColor = true;
-            this.Editar.Visible = false;
             this.Editar.Click += new System.EventHandler(this.button3_Click);
             // 
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.groupBox1.Controls.Add(this.label4);
-            this.groupBox1.Controls.Add(this.groupBox2);
+            this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.linkLabel1);
+            this.groupBox1.Controls.Add(this.label4);
+            this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.path);
+            this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.archivescount);
             this.groupBox1.Controls.Add(this.size);
             this.groupBox1.Controls.Add(this.filename);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(12, 39);
+            this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(478, 133);
+            this.groupBox1.Size = new System.Drawing.Size(524, 101);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Informações";
-            this.groupBox1.Visible = false;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.BackColor = System.Drawing.Color.White;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.ForeColor = System.Drawing.Color.Red;
-            this.label4.Location = new System.Drawing.Point(177, 71);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(40, 13);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "Erros:";
-            this.label4.Visible = false;
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.label6);
-            this.groupBox2.Controls.Add(this.label5);
-            this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Controls.Add(this.label2);
-            this.groupBox2.ForeColor = System.Drawing.Color.Navy;
-            this.groupBox2.Location = new System.Drawing.Point(258, 0);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(220, 96);
-            this.groupBox2.TabIndex = 12;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Selecionado";
-            this.groupBox2.Visible = false;
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.BackColor = System.Drawing.Color.White;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.ForeColor = System.Drawing.Color.Green;
-            this.label6.Location = new System.Drawing.Point(6, 44);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 13);
-            this.label6.TabIndex = 8;
-            this.label6.Text = "Resolução:";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.BackColor = System.Drawing.Color.White;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.ForeColor = System.Drawing.Color.Blue;
-            this.label5.Location = new System.Drawing.Point(121, 53);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(50, 13);
-            this.label5.TabIndex = 7;
-            this.label5.Text = "Strings:";
             // 
             // label3
             // 
@@ -303,23 +261,11 @@
             this.label3.BackColor = System.Drawing.Color.White;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.Green;
-            this.label3.Location = new System.Drawing.Point(22, 71);
+            this.label3.Location = new System.Drawing.Point(237, 53);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(36, 13);
             this.label3.TabIndex = 6;
             this.label3.Text = "Tipo:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.Color.White;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.Color.Green;
-            this.label2.Location = new System.Drawing.Point(10, 16);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(67, 13);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Tamanho: ";
             // 
             // linkLabel1
             // 
@@ -331,6 +277,30 @@
             this.linkLabel1.TabIndex = 4;
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.BackColor = System.Drawing.Color.White;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.ForeColor = System.Drawing.Color.Red;
+            this.label4.Location = new System.Drawing.Point(237, 71);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(40, 13);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "Erros:";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.BackColor = System.Drawing.Color.White;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.ForeColor = System.Drawing.Color.Blue;
+            this.label5.Location = new System.Drawing.Point(366, 71);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(50, 13);
+            this.label5.TabIndex = 7;
+            this.label5.Text = "Strings:";
+            // 
             // path
             // 
             this.path.AutoSize = true;
@@ -341,6 +311,18 @@
             this.path.Size = new System.Drawing.Size(46, 13);
             this.path.TabIndex = 3;
             this.path.Text = "Local: ";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.BackColor = System.Drawing.Color.White;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.ForeColor = System.Drawing.Color.Green;
+            this.label6.Location = new System.Drawing.Point(237, 35);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(71, 13);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "Resolução:";
             // 
             // archivescount
             // 
@@ -378,11 +360,11 @@
             // 
             // treeView1
             // 
-            this.treeView1.Location = new System.Drawing.Point(12, 126);
+            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView1.Location = new System.Drawing.Point(3, 110);
             this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(478, 213);
+            this.treeView1.Size = new System.Drawing.Size(524, 270);
             this.treeView1.TabIndex = 11;
-            this.treeView1.Visible = false;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
             // abrir
@@ -415,63 +397,68 @@
             // 
             this.importbt.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.importbt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.importbt.Location = new System.Drawing.Point(12, 10);
+            this.importbt.Location = new System.Drawing.Point(575, 3);
             this.importbt.Name = "importbt";
-            this.importbt.Size = new System.Drawing.Size(94, 38);
+            this.importbt.Size = new System.Drawing.Size(75, 23);
             this.importbt.TabIndex = 11;
             this.importbt.Text = "Importar";
             this.importbt.UseVisualStyleBackColor = true;
-            this.importbt.Visible = false;
             this.importbt.Click += new System.EventHandler(this.importbt_Click);
             // 
             // exportbt
             // 
             this.exportbt.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.exportbt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.exportbt.Location = new System.Drawing.Point(112, 10);
+            this.exportbt.Location = new System.Drawing.Point(658, 3);
             this.exportbt.Name = "exportbt";
-            this.exportbt.Size = new System.Drawing.Size(94, 38);
+            this.exportbt.Size = new System.Drawing.Size(72, 23);
             this.exportbt.TabIndex = 12;
             this.exportbt.Text = "Exportar";
             this.exportbt.UseVisualStyleBackColor = true;
-            this.exportbt.Visible = false;
             this.exportbt.Click += new System.EventHandler(this.exportbt_Click);
             // 
             // exporttexbt
             // 
             this.exporttexbt.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.exporttexbt.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.exporttexbt.Location = new System.Drawing.Point(225, 10);
+            this.exporttexbt.Location = new System.Drawing.Point(432, 3);
             this.exporttexbt.Name = "exporttexbt";
-            this.exporttexbt.Size = new System.Drawing.Size(137, 38);
+            this.exporttexbt.Size = new System.Drawing.Size(137, 23);
             this.exporttexbt.TabIndex = 13;
             this.exporttexbt.Text = "Exportar Texturas";
             this.exporttexbt.UseVisualStyleBackColor = true;
-            this.exporttexbt.Visible = false;
             this.exporttexbt.Click += new System.EventHandler(this.exporttexbt_Click);
             // 
             // panel1
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.panel1.Controls.Add(this.Editar);
+            this.panel1.Controls.Add(this.pictureBox2);
             this.panel1.Controls.Add(this.exporttexbt);
             this.panel1.Controls.Add(this.importbt);
             this.panel1.Controls.Add(this.exportbt);
-            this.panel1.Location = new System.Drawing.Point(12, 345);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(3, 398);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(478, 65);
+            this.panel1.Size = new System.Drawing.Size(868, 29);
             this.panel1.TabIndex = 14;
-            this.panel1.Visible = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = global::NUC_Raw_Tools.Properties.Resources.icon;
+            this.pictureBox2.Location = new System.Drawing.Point(3, 0);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(33, 29);
+            this.pictureBox2.TabIndex = 14;
+            this.pictureBox2.TabStop = false;
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(496, 39);
+            this.pictureBox1.Location = new System.Drawing.Point(542, 39);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(355, 371);
+            this.pictureBox1.Size = new System.Drawing.Size(320, 283);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 15;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.Visible = false;
             // 
             // Salvo
             // 
@@ -479,7 +466,7 @@
             this.Salvo.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.Salvo.Font = new System.Drawing.Font("Modern No. 20", 11.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Salvo.ForeColor = System.Drawing.Color.Green;
-            this.Salvo.Location = new System.Drawing.Point(358, 7);
+            this.Salvo.Location = new System.Drawing.Point(556, 4);
             this.Salvo.Name = "Salvo";
             this.Salvo.Size = new System.Drawing.Size(143, 17);
             this.Salvo.TabIndex = 7;
@@ -491,6 +478,70 @@
             this.timerSALVO.Interval = 850;
             this.timerSALVO.Tick += new System.EventHandler(this.timerSALVO_Tick);
             // 
+            // layout
+            // 
+            this.layout.ColumnCount = 1;
+            this.layout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.layout.Controls.Add(this.panel1, 0, 1);
+            this.layout.Controls.Add(this.tableLayoutPanel2, 0, 0);
+            this.layout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.layout.Location = new System.Drawing.Point(0, 24);
+            this.layout.Name = "layout";
+            this.layout.RowCount = 2;
+            this.layout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 63F));
+            this.layout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.layout.Size = new System.Drawing.Size(874, 430);
+            this.layout.TabIndex = 16;
+            this.layout.Visible = false;
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 61.76837F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 38.23163F));
+            this.tableLayoutPanel2.Controls.Add(this.panel2, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.propertyGrid1, 1, 0);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 1;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(868, 389);
+            this.tableLayoutPanel2.TabIndex = 15;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.tableLayoutPanel3);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(3, 3);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(530, 383);
+            this.panel2.TabIndex = 0;
+            // 
+            // tableLayoutPanel3
+            // 
+            this.tableLayoutPanel3.ColumnCount = 1;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel3.Controls.Add(this.groupBox1, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.treeView1, 0, 1);
+            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 2;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 28.19843F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 71.80157F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(530, 383);
+            this.tableLayoutPanel3.TabIndex = 9;
+            // 
+            // propertyGrid1
+            // 
+            this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertyGrid1.Location = new System.Drawing.Point(539, 3);
+            this.propertyGrid1.Name = "propertyGrid1";
+            this.propertyGrid1.Size = new System.Drawing.Size(326, 383);
+            this.propertyGrid1.TabIndex = 1;
+            this.propertyGrid1.Visible = false;
+            // 
             // Principal
             // 
             this.AllowDrop = true;
@@ -499,17 +550,16 @@
             this.BackColor = System.Drawing.SystemColors.Control;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(501, 422);
-            this.Controls.Add(this.Salvo);
+            this.ClientSize = new System.Drawing.Size(874, 454);
             this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.treeView1);
+            this.Controls.Add(this.layout);
+            this.Controls.Add(this.Salvo);
             this.Controls.Add(this.abrir);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.IsMdiContainer = true;
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
@@ -522,10 +572,13 @@
             this.menuStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.layout.ResumeLayout(false);
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
+            this.tableLayoutPanel3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -558,8 +611,6 @@
         private System.Windows.Forms.ToolStripMenuItem importarTexturaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recenteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.GroupBox groupBox2;
         public System.Windows.Forms.Button importbt;
         public System.Windows.Forms.Button exportbt;
         public System.Windows.Forms.Button exporttexbt;
@@ -571,5 +622,11 @@
         public System.Windows.Forms.Timer timerSALVO;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TableLayoutPanel layout;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.PropertyGrid propertyGrid1;
     }
 }

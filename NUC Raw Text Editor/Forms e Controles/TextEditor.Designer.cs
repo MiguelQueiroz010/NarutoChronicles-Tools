@@ -32,15 +32,9 @@ namespace NUC_Raw_Tools
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TextEditor));
             this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.filename = new System.Windows.Forms.Label();
-            //this.nrtb1 = new NUC_Raw_Tools.NRTB(this);
-            //this.nrtb2 = new NUC_Raw_Tools.NRTB(this);
-            this.rtb1 = new RichTextBoxEx(this);
-            this.rtb2 = new RichTextBoxEx(this);
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -50,51 +44,13 @@ namespace NUC_Raw_Tools
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaption;
+            this.label1.Font = new System.Drawing.Font("Segoe UI Black", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.SystemColors.HotTrack;
             this.label1.Location = new System.Drawing.Point(0, 1);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(134, 25);
+            this.label1.Size = new System.Drawing.Size(126, 22);
             this.label1.TabIndex = 6;
             this.label1.Text = "Editor de Texto";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.SystemColors.Control;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.Color.Black;
-            this.label2.Location = new System.Drawing.Point(10, 277);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(102, 20);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Sequência:";
-            // 
-            // button4
-            // 
-            this.button4.Enabled = false;
-            this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button4.Location = new System.Drawing.Point(253, 259);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 11;
-            this.button4.Text = "Anterior";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // button5
-            // 
-            this.button5.Enabled = false;
-            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button5.Location = new System.Drawing.Point(343, 259);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 12;
-            this.button5.Text = "Próximo";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // panel1
             // 
@@ -104,10 +60,8 @@ namespace NUC_Raw_Tools
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(430, 23);
+            this.panel1.Size = new System.Drawing.Size(595, 23);
             this.panel1.TabIndex = 13;
-            this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TextEditor_MouseDown);
-            this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Principal_MouseMove);
             // 
             // filename
             // 
@@ -116,60 +70,29 @@ namespace NUC_Raw_Tools
             this.filename.ForeColor = System.Drawing.Color.DarkBlue;
             this.filename.Location = new System.Drawing.Point(140, 6);
             this.filename.Name = "filename";
-            this.filename.Size = new System.Drawing.Size(13, 17);
+            this.filename.Size = new System.Drawing.Size(11, 15);
             this.filename.TabIndex = 7;
             this.filename.Text = " ";
             // 
-            // nrtb1
+            // tableLayoutPanel1
             // 
-            this.rtb1.BackColor = System.Drawing.SystemColors.Window;
-            this.rtb1.BackColor = System.Drawing.SystemColors.Control;
-            //this.nrtb1.Strip.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.rtb1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.rtb1.Location = new System.Drawing.Point(14, 46);
-            this.rtb1.Name = "nrtb1";
-            this.rtb1.Size = new System.Drawing.Size(395, 89);
-            this.rtb1.TabIndex = 14;
-            this.rtb1.NumberColor = Color.Black;
-            this.rtb1.NumberFont = new Font(this.rtb1.Font.FontFamily, 8);
-            this.rtb1.Font = new System.Drawing.Font(this.rtb2.Font.FontFamily, 14);
-            this.rtb1.ShowLineNumbers = true;
-            this.rtb1.VScroll += RichTextBox1_VScroll;
-            //// 
-            //// nrtb2
-            //// 
-            //this.nrtb2.BackColor = System.Drawing.SystemColors.Window;
-            //this.nrtb2.Strip.BackColor = System.Drawing.SystemColors.Control;
-            //this.nrtb2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            //this.nrtb2.Location = new System.Drawing.Point(14, 152);
-            //this.nrtb2.Name = "nrtb2";
-            //this.nrtb2.Size = new System.Drawing.Size(395, 89);
-            //this.nrtb2.TabIndex = 15;
-            this.rtb2.BackColor = System.Drawing.SystemColors.Window;
-            this.rtb2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.rtb2.Location = new System.Drawing.Point(14, 152);
-            this.rtb2.Name = "nrtb2";
-            this.rtb2.NumberFont = new Font(this.rtb1.Font.FontFamily, 8);
-            this.rtb2.Size = new System.Drawing.Size(395, 89);
-            this.rtb2.Font = new System.Drawing.Font(this.rtb2.Font.FontFamily, 14);
-            this.rtb2.TabIndex = 15;
-            this.rtb2.NumberColor = Color.Black;
-            this.rtb2.VScroll += RichTextBox2_VScroll;
-            this.rtb2.ShowLineNumbers = true;
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 23);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 89.26941F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(595, 438);
+            this.tableLayoutPanel1.TabIndex = 14;
             // 
             // TextEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::NUC_Raw_Tools.Properties.Resources.PrincipalBGS;
-            this.ClientSize = new System.Drawing.Size(430, 304);
-            this.Controls.Add(rtb1);
-            this.Controls.Add(rtb2);
-            //this.Controls.Add(this.nrtb2);
-            //this.Controls.Add(this.nrtb1);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
+            this.ClientSize = new System.Drawing.Size(595, 461);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.panel1);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -182,19 +105,13 @@ namespace NUC_Raw_Tools
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label filename;
-        private RichTextBoxEx rtb1, rtb2;
-        //private NRTB nrtb1;
-        //private NRTB nrtb2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }

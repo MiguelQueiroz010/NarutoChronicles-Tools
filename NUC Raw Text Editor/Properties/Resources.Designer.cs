@@ -83,6 +83,26 @@ namespace NUC_Raw_Tools.Properties {
         /// <summary>
         ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap icon {
+            get {
+                object obj = ResourceManager.GetObject("icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icon1 {
+            get {
+                object obj = ResourceManager.GetObject("icon1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap PrincipalBG {
             get {
                 object obj = ResourceManager.GetObject("PrincipalBG", resourceCulture);
@@ -106,6 +126,25 @@ namespace NUC_Raw_Tools.Properties {
         internal static string Recentes {
             get {
                 return ResourceManager.GetString("Recentes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream sobre {
+            get {
+                return ResourceManager.GetStream("sobre", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tenor {
+            get {
+                object obj = ResourceManager.GetObject("tenor", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

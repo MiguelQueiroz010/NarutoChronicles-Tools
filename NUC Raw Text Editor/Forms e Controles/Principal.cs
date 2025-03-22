@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using System.Diagnostics;
 using NUC_Raw_Tools.ArquivoRAW;
-using System.Drawing.Imaging;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.TextFormatting;
+using NUC_Raw_Tools.Arquivo.ArquivoRAW;
 
 namespace NUC_Raw_Tools
 {
@@ -21,7 +16,7 @@ namespace NUC_Raw_Tools
         #region Variáveis
         public RAW rawfile;
         public List<int> groupSelected;
-        Point lastPoint;
+
         OpenFileDialog opened;
         public string rawname, pathf;
         static readonly string[] suffixes =
@@ -37,17 +32,17 @@ namespace NUC_Raw_Tools
         #region Elementos Funcionais e Visuais
         public void ShowHide()
         {
+            layout.Visible = !layout.Visible;
             abrir.Visible = !abrir.Visible;
-            label1.Visible = !label1.Visible;
             salvarToolStripMenuItem.Enabled = !salvarToolStripMenuItem.Enabled;
             salvarComoToolStripMenuItem.Enabled = !salvarComoToolStripMenuItem.Enabled;
             fecharToolStripMenuItem.Enabled = !fecharToolStripMenuItem.Enabled;
-            groupBox1.Visible = !groupBox1.Visible;
-            treeView1.Visible = !treeView1.Visible;
             Editar.Visible = !Editar.Visible;
-            panel1.Visible=!panel1.Visible;
-            if (groupBox1.Visible)
+            if (layout.Visible)
+            {
                 this.BackgroundImage = Properties.Resources.PrincipalBGS;
+                this.Size = new Size(890, 493);
+            }
             else
                 this.BackgroundImage = Properties.Resources.PrincipalBG;
             if (filename.Text.Length > 40)
@@ -72,12 +67,9 @@ namespace NUC_Raw_Tools
             importarToolStripMenuItem.Enabled = false;
             importarTexturaToolStripMenuItem.Enabled = false;
             exportarTexturaToolStripMenuItem.Enabled = false;
-            groupBox2.Visible = false;
             exporttexbt.Visible = false;
             exportbt.Visible = false;
             importbt.Visible = false;
-            label4.Visible = false;
-            pictureBox1.Visible = false;
             this.Size = new Size(520, 460);
         }
         #region Design
@@ -103,10 +95,6 @@ namespace NUC_Raw_Tools
         {
             abrir.ForeColor = Color.Blue;
         }
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
         private void exportarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Export(treeView1, rawfile);
@@ -118,14 +106,6 @@ namespace NUC_Raw_Tools
         }
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if(treeView1.SelectedNode.Level>0)
-            {
-                groupBox2.Visible = true;
-            }
-            else
-            {
-                groupBox2.Visible = false;
-            }
             switch (treeView1.SelectedNode.Level)
             {
                 case 1:
@@ -137,7 +117,6 @@ namespace NUC_Raw_Tools
                     }
                     pictureBox1.Visible = false;
                     label6.Visible = false;
-                    this.Size = new Size(520, 460);
                     if (rawfile.Pastas[treeView1.SelectedNode.Index].type != RAW.Types.Link && rawfile.Pastas[treeView1.SelectedNode.Index].type != RAW.Types.Null)
                     {
                         switch (rawfile.Pastas[treeView1.SelectedNode.Index].type)
@@ -148,6 +127,7 @@ namespace NUC_Raw_Tools
                                 break;
                             case RAW.Types.Texto:
                                 Editar.Enabled = true;
+                                Editar.Visible = true;
                                 label5.Visible = true;
                                 label5.Text = "Strings: " + rawfile.Pastas[treeView1.SelectedNode.Index].texto.SeqCount;
                                 break;
@@ -168,14 +148,9 @@ namespace NUC_Raw_Tools
                     }
                     importarToolStripMenuItem.Enabled = true;
                     exportarTexturaToolStripMenuItem.Enabled = false;
-                    label2.Text = "Tamanho: " + "0x" + rawfile.Pastas[treeView1.SelectedNode.Index].Size.ToString("X2");
+                    size.Text = "Tamanho: " + "0x" + rawfile.Pastas[treeView1.SelectedNode.Index].Size.ToString("X2");
                     label3.Text = "Tipo: " + rawfile.Pastas[treeView1.SelectedNode.Index].type.ToString();
-                    //#region Verificar se é texto
-                    //if (rawfile.Pastas[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
-                    //    Editar.Enabled = true;
-                    //else
-                    //    Editar.Enabled = false;
-                    //#endregion
+
                     break;
 
                 case 2:
@@ -184,7 +159,6 @@ namespace NUC_Raw_Tools
                     label6.Visible = false;
                     importarTexturaToolStripMenuItem.Enabled = false;
                     pictureBox1.Visible = false;
-                    this.Size = new Size(520, 460);
                     if (rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type != RAW.Types.Link && rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type != RAW.Types.Null)
                     {
                         exportbt.Visible = true;
@@ -197,6 +171,7 @@ namespace NUC_Raw_Tools
                                 break;
                             case RAW.Types.Texto:
                                 Editar.Enabled = true;
+                                Editar.Visible = true;
                                 label5.Visible = true;
                                 label5.Text = "Strings: " + rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].texto.SeqCount;
                                 break;
@@ -217,7 +192,7 @@ namespace NUC_Raw_Tools
                         importbt.Visible = false;
                     }
                     exportarTexturaToolStripMenuItem.Enabled = false;
-                    label2.Text = "Tamanho: "+"0x"+rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].Size.ToString("X2");
+                    size.Text = "Tamanho: "+"0x"+rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].Size.ToString("X2");
                     label3.Text = "Tipo: " + rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type.ToString();
                     #region Verificar se é texto
                     if (rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].type == RAW.Types.Texto)
@@ -237,9 +212,9 @@ namespace NUC_Raw_Tools
                     pictureBox1.Visible = true;
                     label5.Visible = false;
                     label6.Visible = true;
-                    this.Size = new Size(882, 460);
                     var tex = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index];
-                    pictureBox1.Image = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.GetImage(treeView1.SelectedNode.Index);
+                    rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.GetImage(treeView1.SelectedNode.Index, out Image mage);
+                    pictureBox1.Image = mage;
                     label3.Text = "Tipo: " + rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].type.ToString();
                     label6.Text = "Resolução: " + pictureBox1.Image.Width + "x" + pictureBox1.Image.Height + " " + rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].Bpp + " Bpp " + rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.Entries[rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].paletteindex].Length / 4 + " cores\nÍndice textura linkada: " +
                         rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.texentries[treeView1.SelectedNode.Index].linkedidx;
@@ -254,7 +229,6 @@ namespace NUC_Raw_Tools
                     importarToolStripMenuItem.Enabled = false;
                     importarTexturaToolStripMenuItem.Enabled = false;
                     pictureBox1.Visible = false;
-                    this.Size = new Size(520, 460);
                     Editar.Enabled = false;
                     break;
             }
@@ -264,61 +238,11 @@ namespace NUC_Raw_Tools
         #endregion
 
         #endregion
-        #region Efeito dos Botões(Fechar e Minimizar)
-        private void button1_MouseEnter(object sender, EventArgs e)
-        {
-            var bt = sender as Button;
-            bt.BackColor = Color.Red;
-        }
-
-        private void button1_MouseLeave(object sender, EventArgs e)
-        {
-            var bt = sender as Button;
-            bt.BackColor = Color.LightGray;
-        }
-
-        private void button2_MouseEnter(object sender, EventArgs e)
-        {
-            var bt = sender as Button;
-            bt.BackColor = Color.Green;
-        }
-
-        private void button2_MouseLeave(object sender, EventArgs e)
-        {
-            var bt = sender as Button;
-            bt.BackColor = Color.LightGray;
-        }
-
-
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Environment.Exit(0);
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Minimized;
-        }
-        #endregion
-        #region Movimento do Form
-        private void Principal_MouseDown(object sender, MouseEventArgs e)
-        {
-            lastPoint = new Point(e.X, e.Y);
-        }
-        private void Principal_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                this.Left += e.X - lastPoint.X;
-                this.Top += e.Y - lastPoint.Y;
-            }
-        }
-        #endregion
+        
         #region Créditos e Etc
         private void sobreToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AboutBox sobre = new AboutBox();
+            AboutBox1 sobre = new AboutBox1(this);
             sobre.ShowDialog();
         }
 
@@ -637,8 +561,9 @@ namespace NUC_Raw_Tools
                         MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         break;
                     case 3:
-                        var tex = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.GetImage(treeView1.SelectedNode.Index);
-                        tex.Save(save.SelectedPath+"/" + treeView1.SelectedNode.Text + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                        var tex = rawfile.Pastas[treeView1.SelectedNode.Parent.Parent.Index].Arquivos[treeView1.SelectedNode.Parent.Index].textura.GetImage(treeView1.SelectedNode.Index, out Image mage);
+                        File.WriteAllBytes(save.SelectedPath + "/" + treeView1.SelectedNode.Text +".tm2", tex);
+                        //tex.Save(save.SelectedPath+"/" + treeView1.SelectedNode.Text + ".png", System.Drawing.Imaging.ImageFormat.Png);
                         MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         break;
                 }
@@ -656,7 +581,7 @@ namespace NUC_Raw_Tools
                         int k = 0;
                         for(int i =0;i< rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].textura.TextureCount;i++)
                         {
-                        rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].textura.GetImage(i).Save(save.SelectedPath + @"/" + treeView1.SelectedNode.Text + @"/" + k.ToString() + ".png", ImageFormat.Png);
+                        File.WriteAllBytes(save.SelectedPath + @"/" + treeView1.SelectedNode.Text + @"/" + k.ToString() + ".tm2", rawfile.Pastas[treeView1.SelectedNode.Parent.Index].Arquivos[treeView1.SelectedNode.Index].textura.GetImage(i, out Image mage));
                                 k++;
                         }
                         MessageBox.Show("Sucesso!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -752,32 +677,22 @@ namespace NUC_Raw_Tools
 
             OpenFileDialog ofd = new OpenFileDialog
             {
-                Filter = "Portable Network Graphics(*.png)|*.png"
+                Filter = "TM2 Graphics(*.tm2)|*.tm2"
             };
 
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
-            if (Path.GetExtension(ofd.FileName).ToLower() != ".png")
+            if (Path.GetExtension(ofd.FileName).ToLower() != ".tm2")
             {
                 MessageBox.Show("Formato de Imagem não suportado!!");
                 return;
             }
 
-            Image input = Image.FromFile(ofd.FileName);
-            Bitmap bitmap = new Bitmap(input);
+            byte[] input = File.ReadAllBytes(ofd.FileName);
+            var timdata = TM2.GetClutandTex(input);
 
-            HashSet<Color> colors = new HashSet<Color>();
-            for (int y = 0; y < bitmap.Height; y++)
-            {
-                for (int x = 0; x < bitmap.Width; x++)
-                {
-                    colors.Add(bitmap.GetPixel(x, y));
-                }
-            }
-
-            Color[] colorArray = colors.ToArray();
-            int colorCount = colorArray.Length;
+            int colorCount = timdata.Bpp == 4 ? 16 : 256;
 
             var selectedNode = treeView1.SelectedNode;
             var parentNode = selectedNode.Parent;
@@ -793,7 +708,7 @@ namespace NUC_Raw_Tools
             int bpp = texEntry.Bpp;
 
             bool isLinked = texEntry.linkedidx != -1;
-            bool isValidSize = input.Width == width && input.Height == height;
+            bool isValidSize = timdata.Width == width && timdata.Height == height;
             bool isValidColorCount = colorCount <= 256;
 
             if (!isLinked && isValidSize && isValidColorCount)
@@ -806,7 +721,7 @@ namespace NUC_Raw_Tools
             if (isLinked)
             {
                 (width, height) = CalculateLinkedTextureSize(textura, texEntry);
-                if (input.Width == width && input.Height == height && bpp == 8 && isValidColorCount)
+                if (timdata.Width == width && timdata.Height == height && timdata.Bpp == 8 && isValidColorCount)
                 {
                     textura.ImportTexture(selectedNode.Index, input);
                     ShowSuccessMessage();
@@ -844,7 +759,7 @@ namespace NUC_Raw_Tools
             treeView1.Select();
             pictureBox1.Visible = true;
             label5.Visible = false;
-            this.Size = new Size(882, 460);
+            this.Size = new Size(890, 493);
         }
 
         public (int, int) CalculateLinkedTextureSize(RAW.TextureArray textura, RAW.TextureEntries texEntry)

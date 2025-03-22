@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Rainbow.ImgLib.Encoding;
 using System.Text;
@@ -15,6 +16,9 @@ using Microsoft.Win32;
 using System.Reflection;
 using System.Xml;
 using System.Windows.Media.Media3D;
+using System.Xml.Linq;
+using NUC_Raw_Tools.Arquivo.ArquivoRAW;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 #endregion
 namespace NUC_Raw_Tools.ArquivoRAW
 {
@@ -529,6 +533,8 @@ namespace NUC_Raw_Tools.ArquivoRAW
             private File intfile;
             private Folder intfold;
 
+
+            public List<string> GetStrings() => sequences.Select(seq => Encodings.Naruto.UzumakiChronicles2.GetString(seq)).ToList();
             public Text(File fil, Folder fold, int index)
             {
                 if (fil != null)
@@ -761,53 +767,20 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 #endregion
 
             }
-            public byte[] GetPixelData4Bpp(Bitmap image, Color[] palette)
-            {
-                int width = image.Width;
-                int height = image.Height;
-                byte[] pixelData = new byte[(width * height) / 2]; // 2 pixels por byte
-                int index = 0;
 
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x += 2)
-                    {
-                        Color c1 = image.GetPixel(x, y);
-                        Color c2 = image.GetPixel(x + 1, y);
-
-                        byte index1 = FindColorIndex(c1, palette);
-                        byte index2 = FindColorIndex(c2, palette);
-
-                        pixelData[index++] = (byte)((index1 << 4) | index2); // Armazena dois pixels em um byte
-                    }
-                }
-                return pixelData;
-            }
-
-            private byte FindColorIndex(Color color, Color[] palette)
-            {
-                for (byte i = 0; i < palette.Length; i++)
-                {
-                    if (palette[i].R == color.R && palette[i].G == color.G && palette[i].B == color.B && palette[i].A == color.A)
-                    {
-                        return i;
-                    }
-                }
-                return 0; // Retorna 0 se não encontrar (fallback)
-            }
             byte[] unswizzledPixelData;
-            public Image GetImage(int textureindex)
+            public byte[] GetImage(int textureindex, out Image mage)
             {
                 Image image = null;
                 List<Color> pal = new List<Color>();
+
                 int pos = 0;
                 byte r, g, b, a;
                 int pixelindex = texentries[textureindex].pixelindex;
                 int paletteidx = texentries[textureindex].paletteindex;
                 int width = texentries[textureindex].Width;
                 int height = texentries[textureindex].Height;
-                //MessageBox.Show("índice de textura: " + textureindex.ToString() + "\n" +
-                //   "Pixel Index: "+pixelindex.ToString() + "\n" + "Palette index: " + paletteidx.ToString());
+
                 while (pos < Entries[paletteidx].Length)
                 {
                     r = Entries[paletteidx][pos];
@@ -820,44 +793,38 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     pos += 4;
                 }
                 Color[] cores = unswizzlePalette(pal.ToArray());
-                byte[] coresbyte = new byte[256 * 4];//1024 bytes = 256 cores
-                for (int i = 0; i < coresbyte.Length; i += 4)
-                {
-                    if ((i / 4) < cores.Length)
-                    {
-                        coresbyte[i] = cores[i / 4].R;
-                        coresbyte[i + 1] = cores[i / 4].G;
-                        coresbyte[i + 2] = cores[i / 4].B;
-                        coresbyte[i + 3] = cores[i / 4].A;
-                    }
-
-                }
+                
                 if (cores.Length <= 256 && cores.Length > 64)
                 {
                     unswizzledPixelData = UnSwizzle8(width, height, Entries[pixelindex]);
-                    ImageDecoderIndexed imageDecoder = new ImageDecoderIndexed(unswizzledPixelData, width, height, IndexCodec.FromNumberOfColors(cores.Length, Rainbow.ImgLib.Common.ByteOrder.BigEndian), cores);
+                    ImageDecoderIndexed imageDecoder = new ImageDecoderIndexed(unswizzledPixelData, width, height, IndexCodec.FromNumberOfColors(cores.Length, Rainbow.ImgLib.Common.ByteOrder.LittleEndian), cores);
                     image = imageDecoder.DecodeImage();
-                    return image;
+                    mage = image;
+                    return TM2.TIMN(unswizzledPixelData, ColorsToByteArray(pal.ToArray(),8), width, height, 8);
                 }
                 if (cores.Length <= 16)
                 {
-                    int add_height = height - 128;
                     ImageDecoderIndexed imageDecoder = new ImageDecoderIndexed(
-                        UnSwizzle(Entries[pixelindex], width, add_height < 0x80 && add_height > 0 ? height + Math.Abs(add_height):height, 4),
+                        ConvertPS2EA4bit(Entries[pixelindex], width, height, 4,false),
                         width, height,
                         IndexCodec.FromNumberOfColors(16, Rainbow.ImgLib.Common.ByteOrder.LittleEndian), cores);
                     image = imageDecoder.DecodeImage();
-                    return image;
+                    mage = image;
+                    return TM2.TIMN(ConvertPS2EA4bit(Entries[pixelindex], width, height, 4, false), ColorsToByteArray(pal.ToArray(), 4), width, height, 4);
+                    
                 }
-                return image;
+                mage = image;
+                return null;
+                
+
             }
-            public void ImportTexture(int index, Image inpt)
+            public void ImportTexture(int index, byte[] TIM)
             {
                 if (texentries[index].linkedidx != -1)
                 {
                     List<byte[]> k = null;
                     int[] links = texentries[index].linkedwith;
-                    var ij = GetPixelandColorData(inpt, true);
+                    var ij = GetPixelandColorData(TIM, true);
                     int offset = 0;
 
                     foreach (var link in links)
@@ -867,14 +834,10 @@ namespace NUC_Raw_Tools.ArquivoRAW
                         int height = entry.Height;
                         int size = width * height;
 
-                        Bitmap orig = new Bitmap(inpt);
-                        Bitmap bit = orig.Clone(new Rectangle(0, 0, width, height), PixelFormat.Format8bppIndexed);
-
-                        k = GetPixelandColorData(bit, true);
+                        k = GetPixelandColorData(TIM, true);
                         Entries[entry.pixelindex] = k[0];
                         Entries[entry.paletteindex] = ij[1];
 
-                        System.IO.File.WriteAllBytes("paleta", Entries[entry.paletteindex]);
                         offset += size;
                     }
                     RebuildData();
@@ -883,7 +846,7 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 {
                     int pixidx = texentries[index].pixelindex;
                     int paletidx = texentries[index].paletteindex;
-                    var k = GetPixelandColorData(inpt, true);
+                    var k = GetPixelandColorData(TIM, true);
 
                     Entries[pixidx] = k[0];
                     Entries[paletidx] = k[1];
@@ -891,75 +854,14 @@ namespace NUC_Raw_Tools.ArquivoRAW
                     RebuildData();
                 }
             }
-
-            HashSet<Color> colors;
-            Color[] cores;
-            byte[] coresbyte;
-
-            public List<byte[]> GetPixelandColorData(Image input, bool swizzle)
+            public List<byte[]> GetPixelandColorData(byte[] input, bool swizzle)
             {
-                colors = new HashSet<Color>();
-                coresbyte = null;
-                cores = null;
-
                 var list = new List<byte[]>();
-                Bitmap bit = new Bitmap(input);
-                
+                var tim = TM2.GetClutandTex(input);
 
-                for (int y = 0; y < bit.Height; y++)
-                    for (int x = 0; x < bit.Width; x++)
-                        colors.Add(bit.GetPixel(x, y));
-
-                cores = new Color[256];
-                Array.Copy(colors.ToArray(), 0, cores, 0, colors.Count);
-                cores = swizzlePalette(cores);
-
-                if (colors.Count <= 16)
-                {
-                    var newc = new Color[16];
-                    Array.Copy(colors.ToArray(), 0, newc, 0, colors.Count);
-                    newc = swizzlePalette(newc);
-                    
-                    cores = newc.ToArray();
-                }
-                else
-                    bit.RotateFlip(RotateFlipType.Rotate180FlipX);
-
-
-                int colorcount = cores.Length <= 16 ? 16 : 256;
-                coresbyte = new byte[colorcount * 4];
-
-                #region Convert ALPHA value
-                for (int i = 0; i < coresbyte.Length; i += 4)
-                {
-                    if ((i / 4) < cores.Length)
-                    {
-                        coresbyte[i] = cores[i / 4].R;
-                        coresbyte[i + 1] = cores[i / 4].G;
-                        coresbyte[i + 2] = cores[i / 4].B;
-                        coresbyte[i + 3] = (cores[i / 4].A <= 255) ? (byte)((cores[i / 4].A * 128) / 255) : cores[i / 4].A;
-                    }
-                }
-                #endregion
-
-                #region Get PixelData
-                var pixeldata = new List<byte>();
-                if (colorcount <= 16)
-                {
-                    pixeldata.AddRange(GetPixelData4Bpp(bit, cores));
-                }
-                else
-                {
-                    for (int y = 0; y < bit.Height; y++)
-                        for (int x = 0; x < bit.Width; x++)
-                            pixeldata.Add(FindColorIndex(bit.GetPixel(x, bit.Height - y - 1), colors.ToArray()));
-                }
-                #endregion
-                System.IO.File.WriteAllBytes("tex4bpp.bin", pixeldata.ToArray());
-                byte[] swizzled = swizzle ? (colorcount == 16 ? Swizzle4bpp(pixeldata.ToArray(), bit.Width, bit.Height) : Swizzle8(input.Width, input.Height, pixeldata.ToArray())) : pixeldata.ToArray();
+                byte[] swizzled = swizzle ? (tim.Bpp == 4 ? ConvertPS2EA4bit(tim.TEX, tim.Width, tim.Height,4,true) : Swizzle8(tim.Width, tim.Height, tim.TEX)) : tim.TEX;
                 list.Add(swizzled);
-                list.Add(coresbyte);
-                System.IO.File.WriteAllBytes("swizz_tex4bpp.bin", list.ToArray()[0]);
+                list.Add(tim.CLUT);
                 return list;
             }
 
@@ -1046,56 +948,26 @@ namespace NUC_Raw_Tools.ArquivoRAW
         }
 
         #region Swizzlers/Unswizzlers
-        public static byte[] Swizzle4bpp(byte[] linear, int width, int height)
+
+        [DllImport("ea_swizzle.dll")]
+        private static extern void swizzle4(byte[] input, byte[] output, int width, int height);
+
+        [DllImport("ea_swizzle.dll")]
+        private static extern void unswizzle4(byte[] input, byte[] output, int width, int height);
+
+        public static byte[] ConvertPS2EA4bit(byte[] imageData, int imgWidth, int imgHeight, int bpp, bool swizzleFlag)
         {
-            byte[] swizzled = new byte[width * height / 2];
+            if (bpp != 4)
+                throw new Exception($"Not supported bpp={bpp} for EA swizzle!");
 
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int index = y * width + x;
+            byte[] convertedData = new byte[imageData.Length];
 
-                    // Swizzle calculations (reverse of UnSwizzle)
-                    int pageX = x & (~0x7f);
-                    int pageY = y & (~0x7f);
+            if (swizzleFlag)
+                swizzle4(imageData, convertedData, imgWidth, imgHeight);
+            else
+                unswizzle4(imageData, convertedData, imgWidth, imgHeight);
 
-                    int pages_horz = (width + 127) / 128;
-                    int pages_vert = (height + 127) / 128;
-                    int page_number = (pageY / 128) * pages_horz + (pageX / 128);
-
-                    int page32Y = (page_number / pages_vert) * 32;
-                    int page32X = (page_number % pages_vert) * 64;
-                    int page_location = page32Y * height * 2 + page32X * 4;
-
-                    int locX = x & 0x7f;
-                    int locY = y & 0x7f;
-
-                    int block_location = ((locX & (~0x1f)) >> 1) * height + (locY & (~0xf)) * 2;
-                    int swap_selector = (((y + 2) >> 2) & 0x1) * 4;
-                    int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
-
-                    int column_location = posY * height * 2 + ((x + swap_selector) & 0x7) * 4;
-                    int byte_num = (x >> 3) & 3;
-                    int bits_set = (y >> 1) & 1;
-                    int pos = page_location + block_location + column_location + byte_num;
-
-                    byte pix = linear[index >> 1];
-                    int uPen;
-
-                    if ((index & 1) != 0)
-                        uPen = (pix >> 4) & 0xF;
-                    else
-                        uPen = pix & 0xF;
-
-                    if ((bits_set & 1) != 0)
-                        swizzled[pos] = (byte)((swizzled[pos] & 0x0F) | ((uPen & 0xF) << 4));
-                    else
-                        swizzled[pos] = (byte)((swizzled[pos] & 0xF0) | (uPen & 0xF));
-                }
-            }
-
-            return swizzled;
+            return convertedData;
         }
         public static byte[] UnSwizzle(byte[] pixel, int width, int height, int bpp)
         {
@@ -1228,6 +1100,36 @@ namespace NUC_Raw_Tools.ArquivoRAW
                 return palette;
             }
         }
+        public static Color[] SwizzlePalette(Color[] palette)
+        {
+            if (palette.Length == 16)
+            {
+                Color[] swizzled = new Color[palette.Length];
+
+                swizzled[0] = palette[0];
+                swizzled[1] = palette[8];
+                swizzled[2] = palette[4];
+                swizzled[3] = palette[12];
+                swizzled[4] = palette[2];
+                swizzled[5] = palette[10];
+                swizzled[6] = palette[6];
+                swizzled[7] = palette[14];
+                swizzled[8] = palette[1];
+                swizzled[9] = palette[9];
+                swizzled[10] = palette[5];
+                swizzled[11] = palette[13];
+                swizzled[12] = palette[3];
+                swizzled[13] = palette[11];
+                swizzled[14] = palette[7];
+                swizzled[15] = palette[15];
+
+                return swizzled;
+            }
+            else
+            {
+                return palette;
+            }
+        }
         public static Color[] swizzlePalette(Color[] palette)
         {
             if (palette.Length == 256)
@@ -1264,6 +1166,25 @@ namespace NUC_Raw_Tools.ArquivoRAW
             }
         }
         #endregion
+        public static byte[] ColorsToByteArray(Color[] clut, int bpp)
+        {
+            int size = 256 * 4;
+            if (bpp == 4)
+                size = 16 * 4;
+            byte[] coresbyte = new byte[size];//1024 bytes = 256 cores
+            for (int i = 0; i < coresbyte.Length; i += 4)
+            {
+                if ((i / 4) < clut.Length)
+                {
+                    coresbyte[i] = clut[i / 4].R;
+                    coresbyte[i + 1] = clut[i / 4].G;
+                    coresbyte[i + 2] = clut[i / 4].B;
+                    coresbyte[i + 3] = clut[i / 4].A;
+                }
+
+            }
+            return coresbyte;
+        }
         public enum Int
         {
             Int16,
