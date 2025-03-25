@@ -14,6 +14,9 @@ namespace NUC_Raw_Tools
 {
     partial class AboutBox1 : Form
     {
+        private Timer timer;
+        private Color[] cores = { Color.Orange ,Color.Blue, Color.Pink, Color.Orange };
+        private int indiceCor = 0;
         SoundPlayer ss;
         Principal f01;
         public AboutBox1(Principal f1)
@@ -24,6 +27,19 @@ namespace NUC_Raw_Tools
             Stream str = Properties.Resources.sobre;
             ss = new SoundPlayer(str);
             ss.Play();
+
+            timer = new Timer()
+            {
+                Interval = 30 // Tempo em milissegundos
+            };
+            timer.Tick += TrocarCor;
+            timer.Start();
+
+        }
+        private void TrocarCor(object sender, EventArgs e)
+        {
+            indiceCor = (indiceCor + 1) % cores.Length;
+            label1.ForeColor = cores[indiceCor];
         }
         void closex()
         {
@@ -53,6 +69,11 @@ namespace NUC_Raw_Tools
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start("http://bitmundo.xyz");
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/MiguelQueiroz010/NarutoChronicles-Tools");
         }
     }
 }

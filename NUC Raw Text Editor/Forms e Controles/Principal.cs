@@ -20,7 +20,7 @@ namespace NUC_Raw_Tools
         OpenFileDialog opened;
         public string rawname, pathf;
         static readonly string[] suffixes =
-{ "Bytes", "KB", "MB", "GB", "TB", "PB" };
+        { "Bytes", "KB", "MB", "GB", "TB", "PB" };
         byte[] raw;
         #endregion
         public Principal()
@@ -28,12 +28,12 @@ namespace NUC_Raw_Tools
             InitializeComponent();
             this.Size = new Size(520, 460);
             CheckRecent();
+            
         }
         #region Elementos Funcionais e Visuais
         public void ShowHide()
         {
             layout.Visible = !layout.Visible;
-            abrir.Visible = !abrir.Visible;
             salvarToolStripMenuItem.Enabled = !salvarToolStripMenuItem.Enabled;
             salvarComoToolStripMenuItem.Enabled = !salvarComoToolStripMenuItem.Enabled;
             fecharToolStripMenuItem.Enabled = !fecharToolStripMenuItem.Enabled;
@@ -73,28 +73,6 @@ namespace NUC_Raw_Tools
             this.Size = new Size(520, 460);
         }
         #region Design
-        private void abrir_Click(object sender, EventArgs e)
-        {
-
-            abrirToolStripMenuItem.PerformClick();
-        }
-
-        private void abrir_MouseEnter(object sender, EventArgs e)
-        {
-            abrir.ForeColor = Color.DarkBlue;
-            abrir.Font = new Font(abrir.Font.FontFamily,20, FontStyle.Bold);
-        }
-
-        private void abrir_MouseLeave(object sender, EventArgs e)
-        {
-            abrir.ForeColor = Color.Black;
-            abrir.Font = new Font(abrir.Font.FontFamily, 18, FontStyle.Bold);
-        }
-
-        private void abrir_MouseClick(object sender, MouseEventArgs e)
-        {
-            abrir.ForeColor = Color.Blue;
-        }
         private void exportarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Export(treeView1, rawfile);
@@ -404,7 +382,6 @@ namespace NUC_Raw_Tools
                 #endregion
                 timerSALVO.Enabled = true;
                 timerSALVO.Start();
-                Salvo.Visible = true;
             }
         }
         public void Abrir(bool isDrag, string fileName)
@@ -862,7 +839,6 @@ namespace NUC_Raw_Tools
         private void timerSALVO_Tick(object sender, EventArgs e)
         {
             timerSALVO.Stop();
-            Salvo.Visible = false;
         }
 
 

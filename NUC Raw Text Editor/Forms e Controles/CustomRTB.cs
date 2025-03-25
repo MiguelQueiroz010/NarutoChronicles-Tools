@@ -54,7 +54,7 @@ namespace NUC_Raw_Tools.Forms_e_Controles
             rtbLineNumbers = new RichTextBox
             {
                 Font = new Font("Consolas", 10),
-                Width = 50,
+                Width = 32,
                 ReadOnly = true,
                 ScrollBars = RichTextBoxScrollBars.None,
                 BackColor = Color.LightGray,
@@ -70,10 +70,10 @@ namespace NUC_Raw_Tools.Forms_e_Controles
                 BorderStyle = BorderStyle.None,
                 Dock = DockStyle.Fill
             };
-            rtbEditor.VScroll += (s, e) => AtualizarNumeroLinhas();
+            rtbEditor.VScroll += RtbEditor_Changed;
             rtbEditor.TextChanged += RtbEditor_Changed;
-            rtbEditor.SelectionChanged += (s, e) => AtualizarNumeroLinhas();
-            rtbEditor.Paint += RtbEditor_Paint;
+            rtbEditor.SelectionChanged += RtbEditor_Changed;
+            rtbEditor.Paint += RtbEditor_Changed;
             tableLayoutPanel.Controls.Add(rtbEditor, 1, 0);
 
             AtualizarNumeroLinhas();
@@ -112,29 +112,10 @@ namespace NUC_Raw_Tools.Forms_e_Controles
 
                     Bitmap buttonImage = buttonSprites.Clone(buttonRect, System.Drawing.Imaging.PixelFormat.DontCare);
                     g.DrawImage(buttonImage, position);
+                    
                 }
             }
-        }
-        private void RtbEditor_Paint(object sender, PaintEventArgs e)
-        {
-            string text = rtbEditor.Text;
-            Graphics g = e.Graphics;
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
-            MatchCollection matches = Regex.Matches(text, @"\/\w+");
-            foreach (Match match in matches)
-            {
-                string foundText = match.Value;
-                if (buttonMap.ContainsKey(foundText))
-                {
-                    int charIndex = match.Index;
-                    Point position = rtbEditor.GetPositionFromCharIndex(charIndex);
-                    Rectangle buttonRect = buttonMap[foundText];
-
-                    Bitmap buttonImage = buttonSprites.Clone(buttonRect, System.Drawing.Imaging.PixelFormat.DontCare);
-                    g.DrawImage(buttonImage, position);
-                }
-            }
+            
         }
     }
 }
